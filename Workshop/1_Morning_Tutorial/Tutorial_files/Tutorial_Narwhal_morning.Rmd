@@ -610,6 +610,36 @@ Do the following questions.
 
 The answers are found in section \@ref(sec-res-pb) below. But only peak if you are stuck, instead look at the narwhal code.
 
+# Extra: Process covariates
+
+Next, we need to derive our data streams (step lengths and turning angles) and covariates. 
+One covariate we will explore is time of day, so we will derive it now.
+
+```{r prep, attr.source = ".numberLines"}
+# calculate time of day variable (for later use)
+tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
+```
+
+Now, we will get our observation variables using the `prepData` function. 
+
+The default is UTM, but here the narwhal location data is in Latitude and Longitude, so we specify "LL" in `type`. 
+
+The argument `covNames` will distinguish our model covariates from data streams. 
+If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
+
+As mentioned above, we will also explore using bathymetry as a covariate. Thus, we will extract the bathymetry values at the location using the argument `spatialCovs`.
+
+```{r prep2, attr.source = ".numberLines"}
+# calculate step length and turning angles
+data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
+
+# take a peak at the data
+head(data)
+```
+
+We can see that `prepData` has calculated the step length and the turning angle, and has extracted the bathymetry value at each location.  
+
+
 # Extra: handling irregular data {#sec-narwhal-reg}
 
 First, let's import the raw Fastloc GPS narwhal data and convert the time column to an appropriate date format.
