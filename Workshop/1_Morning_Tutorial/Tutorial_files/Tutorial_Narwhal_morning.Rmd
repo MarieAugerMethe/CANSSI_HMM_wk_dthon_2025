@@ -115,7 +115,7 @@ knitr::include_graphics("example_ta_sl.png")
 
 ```
 
-We will use this measurements as observations to fit a HMM. 
+We will use these measurements as observations to fit a HMM. 
 
 
 # Import data (with description and simple processing)
