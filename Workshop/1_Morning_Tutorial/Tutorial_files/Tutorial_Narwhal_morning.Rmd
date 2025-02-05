@@ -94,28 +94,12 @@ For simplicity, we only examine the fastloc-GPS data from two weeks in August 20
 
 
 
-```{r,fig.align='center',echo=F,out.width="30%"}
+```{r,fig.align='center',echo=F,out.width="40%"}
 
 knitr::include_graphics("./Photos/PaulNicklen.jpeg")
 
 
 ```
-
-Steps and turns are a way to describe observed animal trajectories by measuring the distance between locations and the angle of the turns made between them. 
-
-**Step length:** distance between two consecutive locations 
-
-**Turning angle:** the angle between three consecutive locations. 
-
-
-```{r,fig.align='center',echo=F}
-
-knitr::include_graphics("example_ta_sl.png")
-
-
-```
-
-We will use these measurements as observations to fit a HMM. 
 
 
 # Import data (with description and simple processing)
@@ -151,55 +135,54 @@ For some of the visualization, it's helpful to use a spatial object, and so we t
 tracks_gps_sf <- tracks_gps %>% st_as_sf(coords = c("x", "y")) %>% st_set_crs(4326)
 ```
 
-As we will see later we will also use bathymetry data as a spatial covariate. Let's import it here.
-
-The raw bathymetry data used to create this raster was taken from the the GEBCO global ocean and land terrain model from https://pressbooks.bccampus.ca/ewemodel/chapter/getting-bathymetry/.
-
-```{r import_bathy, attr.source = ".numberLines"}
-bathy <- raster("data/bathy_4_narwhals.tiff")
-```
-
-Note that land values of the bathymetry layer are 0s.
-
-To get a reference of where these narwhals are swimming, let's also import a land layer.
+To get a reference of where these narwhals are swimming, let's import a land layer.
 
 ```{r import_land, attr.source = ".numberLines"}
 land <- st_read("data/NorthBaffin.shp")
 ```
 
-Let's plot the narwhal movement data over the bathymetry and land layers.
+Let's plot the narwhal movement data over the map.
 
 ```{r plot_gps_data, warning=FALSE, attr.source = ".numberLines"}
 ggplot() +
-  geom_spatraster(data=rast(bathy)) +
   geom_sf(data=land, fill="beige") +
   geom_spatial_path(data = tracks_gps, 
-                    aes(x = x, y = y, colour=factor(ID)), crs = 4326) 
+                    aes(x = x, y = y, colour=factor(ID)), crs = 4326) + 
+  theme_classic() +
+  theme(panel.background = element_rect(fill = 'lightblue'))
 
 ```
 
 We can see that even though its the data for only 3 narwhals, that there are more than 3 tracks. 
 These represent the split tracks we created every time we had a data gap longer than 1 hr.
 
-# Create data streams and process covariates
+# Create data streams 
 
-Next, we need to derive our data streams (step lengths and turning angles) and covariates. 
-One covariate we will explore (see Extra section) is time of day, so we will derive it now.
+Steps and turns are a way to describe observed animal trajectories by measuring the distance between locations and the angle of the turns made between them. 
 
-```{r prep, attr.source = ".numberLines"}
-# calculate time of day variable (for later use)
-tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
+**Step length:** distance between two consecutive locations 
+
+**Turning angle:** the angle between three consecutive locations. 
+
+
+```{r,fig.align='center',echo=F,out.width="70%"}
+
+knitr::include_graphics("example_ta_sl.png")
+
+
 ```
 
-Now, we will derive our observation variables using the `prepData` function. This process involves transforming our data into steps and turns angles, making it ready to use with `momentuHMM`.
+We will use these measurements as observations to fit a HMM. 
 
-The default is UTM, but here the narwhal location data is in Latitude and Longitude, so we specify "LL" in `type`. The argument `covNames` will distinguish our model covariates from data streams (not needed if we are are not using covariates). If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
+To derive our data streams from our observations, we will use the `prepData` function. This process involves transforming our data into steps and turns angles, making it ready to use with `momentuHMM`.
 
-As mentioned above, in the Appendix we will also explore using bathymetry as a covariate. Thus, we will extract the bathymetry values at the location using the argument `spatialCovs`.
+The default is UTM, but here the narwhal location data is in Latitude and Longitude, so we specify "LL" in `type`.
+
+
 
 ```{r prep2, attr.source = ".numberLines"}
 # calculate step length and turning angles
-data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
+data <- prepData(tracks_gps, type = "LL")
 
 # take a peak at the data
 head(data)
@@ -508,9 +491,48 @@ For each transition probability, $\beta_0^{(ij)}$ is an intercept parameter, and
 
 Here, we will will create a model where transition probabilities vary as a function of the bathymetry (i.e., depth of the ocean). Thus $\omega_1$ is the bathymetry value associated with that step and we can simply specify with a formula like the one used in simple linear models. 
 
+Let's import it  bathymetry data .
+
+```{r import_bathy, attr.source = ".numberLines"}
+bathy <- raster("data/bathy_4_narwhals.tiff")
+```
+
+The raw bathymetry data used to create this raster was taken from the the GEBCO global ocean and land terrain model from https://pressbooks.bccampus.ca/ewemodel/chapter/getting-bathymetry/.Note that land values of the bathymetry layer are 0s. Let's plot the narwhal movement data over the bathymetry and land layers.
+
+
+```{r , warning=FALSE, attr.source = ".numberLines"}
+ggplot() +
+  geom_spatraster(data=rast(bathy)) +
+  geom_sf(data=land, fill="beige") +
+  geom_spatial_path(data = tracks_gps, 
+                    aes(x = x, y = y, colour=factor(ID)), crs = 4326) 
+  
+
+```
+
+One covariate we will explore is time of day. Lets derive it
+
+```{r prep, attr.source = ".numberLines"}
+# calculate time of day variable (for later use)
+tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
+```
+
+
+
 ```{r formula_bathy, cache = TRUE, attr.source = ".numberLines"}
 formula_bathy <- ~bathy
 ```
+
+The argument `covNames` will distinguish our model covariates from data streams (not needed if we are are not using covariates). If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
+
+```{r, attr.source = ".numberLines"}
+# calculate step length and turning angles
+data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
+
+# take a peak at the data
+head(data)
+```
+1234
 
 To be able to fit the HMM, we need to specify initial parameters and we will use the function `getPar0` to do so. This will use the estimated parameters of a previously fitted 2-state model with no covariates. 
 Note that it will set the unknown linear predictor parameters to 0, and use the intercept of the previous model. 
