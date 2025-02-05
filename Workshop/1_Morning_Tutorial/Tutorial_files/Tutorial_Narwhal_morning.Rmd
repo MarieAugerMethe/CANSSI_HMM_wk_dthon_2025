@@ -297,7 +297,7 @@ has smaller step lengths compared to state 2. The turning angle distributions of
 Based on this, we may label state 1 as "resident" and state 2 as "travel". 
 
 
-## Identifying behavioural states
+## Decoding the hidden sequence. 
 
 We are interested in identifying when an animal is in each of the behavioural states (i.e., when the animal is in state 1 vs state 2), what its called state decoding. 
 We can use the function `viterbi`, which uses the Viterbi algorithm to produce the most likely sequence of states according to your fit model and data.
@@ -406,7 +406,7 @@ mod_RF <- fitHMM(data,
                  nbState = 2,
                  dist=list(step="gamma", angle="vm"),
                  Par0 = Par0,
-                 retryFits = 20)
+                 retryFits = 1)
 ``` 
 
 Let’s compare the results again.
@@ -522,6 +522,33 @@ tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
 
 
 
+Next, we need to derive our data streams (step lengths and turning angles) and covariates. 
+One covariate we will explore is time of day, so we will derive it now.
+
+```{r prep3, attr.source = ".numberLines"}
+# calculate time of day variable (for later use)
+tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
+```
+
+Now, we will get our observation variables using the `prepData` function. 
+
+
+The argument `covNames` will distinguish our model covariates from data streams. 
+If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
+
+As mentioned above, we will also explore using bathymetry as a covariate. Thus, we will extract the bathymetry values at the location using the argument `spatialCovs`.
+
+```{r prep4, attr.source = ".numberLines"}
+# calculate step length and turning angles
+data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
+
+# take a peak at the data
+head(data)
+```
+
+We can see that `prepData` has calculated the step length and the turning angle, and has extracted the bathymetry value at each location.  
+
+
 ```{r formula_bathy, cache = TRUE, attr.source = ".numberLines"}
 formula_bathy <- ~bathy
 ```
@@ -541,8 +568,17 @@ As done earlier, we need to specify initial parameters and we will use the funct
 Note that it will set the unknown linear predictor parameters to 0, and use the intercept of the previous model. 
 
 ```{r tpm_par0, message = FALSE, cache = TRUE, attr.source = ".numberLines"}
-# set tpm formula and extract initial values from simpler model
-Par0_4 <- getPar0(model = mod2, formula = formula_bathy)
+
+# Here we first fit the model with no covariates: 
+
+mod3 <- fitHMM(data, 
+               stateNames = stateNames, 
+               nbState = 2, 
+               dist = dist, 
+               Par0 = Par0_2)
+
+
+Par0_4 <- getPar0(model = mod3, formula = formula_bathy)
 Par0_4
 ```
 
@@ -594,7 +630,7 @@ We can derive the initial parameters using the `getPar0` function, as described 
 DM <- list(step = list(mean = formula_tod, sd = ~1))
 
 # extract initial values from simpler 2-state model with no covariates
-Par0_5 <- getPar0(model = mod2, DM = DM)
+Par0_5 <- getPar0(model = mod3, DM = DM)
 ```
 
 Now we can fit the HMM with covariate-dependent observation parameters. 
@@ -670,34 +706,6 @@ Do the following questions.
 
 The answers are found in section \@ref(sec-res-pb) below. But only peak if you are stuck, instead look at the narwhal code.
 
-## Extra: Process covariates
-
-Next, we need to derive our data streams (step lengths and turning angles) and covariates. 
-One covariate we will explore is time of day, so we will derive it now.
-
-```{r prep3, attr.source = ".numberLines"}
-# calculate time of day variable (for later use)
-tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
-```
-
-Now, we will get our observation variables using the `prepData` function. 
-
-The default is UTM, but here the narwhal location data is in Latitude and Longitude, so we specify "LL" in `type`. 
-
-The argument `covNames` will distinguish our model covariates from data streams. 
-If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
-
-As mentioned above, we will also explore using bathymetry as a covariate. Thus, we will extract the bathymetry values at the location using the argument `spatialCovs`.
-
-```{r prep4, attr.source = ".numberLines"}
-# calculate step length and turning angles
-data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
-
-# take a peak at the data
-head(data)
-```
-
-We can see that `prepData` has calculated the step length and the turning angle, and has extracted the bathymetry value at each location.  
 
 
 ## Handling irregular data {#sec-narwhal-reg}
