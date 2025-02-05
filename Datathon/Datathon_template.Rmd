@@ -50,3 +50,8 @@ The goals are (1) to provide a road map of how to tackle the questions listed be
 
 XX LIST THE QUESTIONS YOU WANT TO ANSWER WITH THE DATA. KEEP IN MIND THAT HIDDEN MARKOV MODEL WILL TAKE A TIME SERIES AND FIND HIDDEN STATES WITHIN IT. USUALLY YOU WILL HAVE 3-4 HIDDEN STATES.
 
+## Acknowledgments
+
+If the analysis you developed with your team,  or a derivative of it, is used in your thesis or in a publication, please add the name of our research team and of your teammates in the acknowledgements. Please also let Marie Auger-Méthé (auger-methe@stat.ubc.ca) and Vianey Leos Barajas (vianey.leosbarajas@utoronto.ca) know, as we will be excited to see that our datathon has provided you with concrete help! The name of our team is: **CANSSI: Advancing Statistical Methods for the Analysis of Complex Biologging Data Collected from Humans and Animals**.
+
+
