@@ -244,10 +244,13 @@ The turning angles are either very close to $0$ or pretty spread from $-\pi/2$ t
 Values close to 0 mean that the turning angle distribution is almost uniform (the animal turns in all directions). 
 Note that $\kappa$ cannot be exactly 0, so let’s choose 0.1 and 1.
 
-So now, lets fit the model:
-- 2 states
-- Observations: Step length(gamma distribution) and turning angle (von Mises distribution)
-- No covariates included
+So now, lets fit the following model:
+
+  * 2 states
+  
+  * Observations: Step length(gamma distribution) and turning angle (von Mises distribution)
+  
+  * No covariates included
 
 ```{r inits3, message=FALSE, attr.source = ".numberLines", cache=TRUE}
 # define number of states
@@ -291,7 +294,7 @@ plot(mod, ask = FALSE, plotTracks = FALSE)
 Based on the mean step length parameters, it looks like the first behavioural state 
 has smaller step lengths compared to state 2. The turning angle distributions of the second state indicates much more directed movement, with higher angular concentration.
 
-Based on this, we may labelstate 1 as "resident" and state 2 as "travel". 
+Based on this, we may label state 1 as "resident" and state 2 as "travel". 
 
 
 ## Identifying behavioural states
@@ -532,9 +535,9 @@ data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(b
 # take a peak at the data
 head(data)
 ```
-1234
 
-To be able to fit the HMM, we need to specify initial parameters and we will use the function `getPar0` to do so. This will use the estimated parameters of a previously fitted 2-state model with no covariates. 
+
+As done earlier, we need to specify initial parameters and we will use the function `getPar0` to do so. This will use the estimated parameters of a previously fitted 2-state model with no covariates. 
 Note that it will set the unknown linear predictor parameters to 0, and use the intercept of the previous model. 
 
 ```{r tpm_par0, message = FALSE, cache = TRUE, attr.source = ".numberLines"}
@@ -567,7 +570,7 @@ Here it looks like the "resident" behaviour is less common than the "travelling"
 
 ### Covariates in the observation model
 
-This section will illustrate how to model mean step length as a function of a  covariate. 
+Now we will illustrate how to model mean step length as a function of a  covariate. 
 Any parameter in the observation model (e.g., mean or sd of the step lengths, or turning angle parameters) can be modelled as a function of a covariate, which allows for the movement behaviour within each discrete state to vary. 
 
 Here, we will model mean step length based on the time of day.
