@@ -406,7 +406,7 @@ mod_RF <- fitHMM(data,
                  nbState = 2,
                  dist=list(step="gamma", angle="vm"),
                  Par0 = Par0,
-                 retryFits = 1)
+                 retryFits = 5)
 ``` 
 
 Let’s compare the results again.
