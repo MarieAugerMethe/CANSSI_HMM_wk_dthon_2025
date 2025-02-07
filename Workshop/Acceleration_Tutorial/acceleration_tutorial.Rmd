@@ -290,9 +290,21 @@ table(BlacktipB_1min$hmm1_state)/length(BlacktipB_1min$hmm1_state)
 
 # Plot of decoded states
 hmm1$plot_ts("ODBA_avg")
-
-
 ```
+
+Again, we observe that lower 1-min ODBA avg values are classified as state 1 (lower activity state) and higher values as state 2 (higher activity state). 
+
+Similarly, we can determine the most probable state at a given time point using the forward-backward algorithm via `state_probs()`. 
+
+```{r}
+BlacktipB_1min$pr_s2 <- hmm1$state_probs()[,2]
+ggplot(BlacktipB_1min, aes(Time, ODBA_avg, col = pr_s2)) +
+geom_point() +
+scico::scale_color_scico(palette = "berlin",
+name = expression("Pr("~S[t]~"= 2)"))
+```
+
+There tends to be high uncertainty for observations with intermediate values and some with lower values.
 
 For the HMM with covariates in the transition probabilities, we can plot the stationary state probabilities to examine how the likelihood of the shark being in each state varies throughout the day.
 
@@ -337,7 +349,6 @@ Caveat: AIC and other model selection criteria are known to overestimate the tru
 In the context of shark behaviour (or that of many other marine animals), plotting the depth timeseries coloured according to the most likely state sequence can help with interpretation, especially in combination with prior knowledge about the ecology of your study species.
 
 ```{r}
-
 #Subset the data frame to include only the first day ()
 BlacktipB_day1 <- BlacktipB_1min[1:1440,]
 
@@ -355,7 +366,7 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
 
 # Exercises {-}
 
-1. Reproduce the analysis from the blacktip reef shark data, but now consider three behavioural states instead of only two. For this, do an exploratory data analysis to try to set initial values for the state-dependent distribution parameters. Look at the pseudo-residual values and the ACF plot. Does the autocorrelation reduces when considering another behavioural state. Is there a noticeable difference in the ACF compared to the initial 2-state HMM?
+1. Reproduce the analysis from the blacktip reef shark data, but now consider three behavioural states instead of only two. For this, do an exploratory data analysis to try to set initial values for the state-dependent distribution parameters. Look at the pseudo-residual values and the ACF plot. Does the autocorrelation reduce when considering another behavioural state. Is there a noticeable difference in the ACF compared to the initial 2-state HMM?
 
 2. For the 2-state HMM, try to incorporate other variables as covariates (consider the 1-minute average temperature and depth variables). Fit this new model with help from the code above. What are the AIC and the log-likelihood values? How are these different from the values related to the second model fitted. Based on the AIC, which model seems to be the “best”?
 
