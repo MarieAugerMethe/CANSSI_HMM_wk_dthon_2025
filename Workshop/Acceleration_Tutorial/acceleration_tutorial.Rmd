@@ -44,7 +44,15 @@ The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to 
 
 5. Model selection 
 
+## Packages
+
 In this tutorial, we use the `hmmTMB` package (Michelot 2022) in R to fit HMMs. This package offers flexibility in incorporating covariate effects. However, many other software packages are available for fitting HMMs, each with different model formulations and a focus on specific data types. More information on `hmmTMB` can be found [here](https://arxiv.org/pdf/2211.14139). 
+```{r, attr.source = ".numberLines"}
+# Load R packages 
+library(readr)
+library(tidyverse)
+library(hmmTMB)
+```
 
 # Data Background {-}
 
@@ -63,11 +71,6 @@ ODBA and VeDBA can be used to reduce the dimensionality of three-dimension accel
 In this tutorial, we will be analyzing four days' worth of acceleration data from a free-ranging blacktip reef shark in the Palmyra Atoll located in the central Pacific Ocean. The acceleration data was collected from a 117-cm female shark (*Carcharhinus melanopterus*) species using a multisensor package. This package was attached to the shark's dorsal fin and recorded three-dimensional acceleration data at a rate of 20 Hz. It also recorded depth and water temperature at a rate of 1 Hz. After four days, the package, which was equipped with a VHF transmitter, detached from the shark and was retrieved from the water surface (Papastamatiou et al. 2015). To assess the shark's behaviour, the authors calculated the average ODBA over 1-second intervals, resulting in a dataset comprising of 320,214 observations. Consequently, the variables in the dataset consist of time of day, water temperature (in Celsius), depth (in meters), and ODBA.
 
 ```{r, attr.source = ".numberLines"}
-# Load R packages 
-library(readr)
-library(tidyverse)
-library(hmmTMB)
-
 # Load data 
 BlacktipB <- read_delim("BlacktipB.txt", 
                         delim = "\t", escape_double = FALSE, 
