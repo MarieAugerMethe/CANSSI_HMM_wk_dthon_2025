@@ -32,7 +32,7 @@ knitr::opts_chunk$set(message = FALSE)
 
 # Tutorial Objectives {-}
 
-The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to time-series data. We will cover the following topics:
+The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to time-series data, using accelerometer data as a case study. We will cover the following topics:
 
 1. Fitting a basic HMM 
 
@@ -52,7 +52,7 @@ In this tutorial, we use the `hmmTMB` package (Michelot 2022) in R to fit HMMs. 
 
 Accelerometer devices measure up to three axes, which can be described relative to the body of the animal: longitudinal (surge), lateral (sway) and dorsoventral (heave). These devices are becoming more prevalent in the fields of animal biologging data as they provide a means of measuring activity in a meaningful and quantitative way. From tri-axial acceleration data, we can also derive several metrics that summarize effort or exertion and relate acceleration to activity levels such as overall dynamic body acceleration (ODBA) and vectorial dynamic body acceleration (VeDBA).
 
-```{r,fig.align='center',echo=F}
+```{r, fig.align='center', echo=FALSE}
 knitr::include_graphics("ODBA_pic.png")
 ```
 
