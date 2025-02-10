@@ -360,7 +360,7 @@ A similar effect of TOD is observed for the low-activity state (state 1), though
 
 The Akaike Information Criteria (AIC) provides a measure of the trade-off between model fit and complexity. It is commonly used as a model selection criterion to select for the most suitable model among a set of candidate models. Lower AIC scores indicate a better balance between model fit and complexity.
 
-We can compare the AIC scores using the `AIC` function for our original HMM (`hmm1`), the model with TOD as a covariate in the transition probabilities HMM (`hmm2`), and the model with TOD as a covariate in the state-dependent mean parameters HMM (`hmm3`).
+We can compare the AIC scores using the `AIC` function for our original HMM (`hmm1`), the model with TOD as a covariate in the transition probabilities (`hmm2`), and the model with TOD as a covariate in the state-dependent mean parameters (`hmm3`).
 
 
 ```{r, attr.source = ".numberLines"}
