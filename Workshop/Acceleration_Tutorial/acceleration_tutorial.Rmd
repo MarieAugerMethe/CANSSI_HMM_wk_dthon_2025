@@ -117,7 +117,7 @@ BlacktipB_1min %>%
 
 Our first goal is to fit a basic 2-state HMM to the 1-min avg ODBA.
 
-Before doing so it's good to look at the data. This will help us decide what may be appropriate distributions and starting values.
+Before doing so it's good to look at the data. This will help us decide what may be appropriate distributions and initial values.
 
 ```{r, attr.source = ".numberLines"}
 hist(BlacktipB_1min$ODBA_avg, 
