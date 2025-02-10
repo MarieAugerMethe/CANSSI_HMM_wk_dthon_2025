@@ -375,6 +375,8 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
 
 # References {-}
 
-Michelot, T. (2022) hmmTMB: hidden Markov models with flexible covariate effects in R. arXiv:2211.14139v2 
+Michelot, T (2022) hmmTMB: hidden Markov models with flexible covariate effects in R. arXiv:2211.14139v2
+
+Papastamatiou YP, Watanabe YY, Bradley D, Dee LE, Weng K, et al. (2015) Drivers of Daily Routines in an Ectothermic Marine Predator: Hunt Warm, Rest Warmer? PLOS ONE 10: e0127807. https://doi.org/10.1371/journal.pone.0127807
 
 
