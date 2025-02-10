@@ -364,6 +364,8 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
 
 
 
+
+
 # Exercises {-}
 
 1. Reproduce the analysis from the blacktip reef shark data, but now consider three behavioural states instead of only two. For this, do an exploratory data analysis to try to set initial values for the state-dependent distribution parameters. Look at the pseudo-residual values and the ACF plot. Does the autocorrelation reduce when considering another behavioural state. Is there a noticeable difference in the ACF compared to the initial 2-state HMM?
@@ -371,6 +373,8 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
 2. For the 2-state HMM, try to incorporate other variables as covariates (consider the 1-minute average temperature and depth variables). Fit this new model with help from the code above. What are the AIC and the log-likelihood values? How are these different from the values related to the second model fitted. Based on the AIC, which model seems to be the “best”?
 
 
+# References {-}
 
+Michelot, T. (2022) hmmTMB: hidden Markov models with flexible covariate effects in R. arXiv:2211.14139v2 
 
 
