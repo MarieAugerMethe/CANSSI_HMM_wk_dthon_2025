@@ -106,7 +106,7 @@ BlacktipB_1min <- BlacktipB_1min %>% mutate(Time = as.POSIXct(Time,format = "%Y-
 
 The 1-min average ODBA time series is shown below. 
 
-```{r,echo=T, fig.height= 4, fig.width=12}
+```{r,echo=T, fig.height= 4, fig.width=12, attr.source = ".numberLines"}
 BlacktipB_1min %>% 
   ggplot(aes(Time,ODBA_avg)) + 
   geom_line()  
@@ -115,9 +115,11 @@ BlacktipB_1min %>%
 
 # Fitting a Basic HMM
 
-We fit a basic 2-state HMM to the 1-min avg ODBA.
+Our first goal is to fit a basic 2-state HMM to the 1-min avg ODBA.
 
-```{r}
+Before doing so it's good to look at the data. This will help us decide what may be appropriate distributions and starting values.
+
+```{r, attr.source = ".numberLines"}
 hist(BlacktipB_1min$ODBA_avg, 
      breaks = 80, 
      main="Histogram of ODBA", 
