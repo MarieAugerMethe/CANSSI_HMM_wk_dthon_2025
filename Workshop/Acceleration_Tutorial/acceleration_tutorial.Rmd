@@ -253,7 +253,7 @@ Let's examine the effect of TOD on the mean parameter of the Gamma state-depende
 
 ```{r, attr.source = ".numberLines"}
 # Formula for observation model
-fobs = list(ODBA_avg = list(mean = ~s(TOD, bs="cc")))
+fobs <- list(ODBA_avg = list(mean = ~s(TOD, bs="cc")))
 ```
 
 ```{r, attr.source = ".numberLines"}
@@ -273,15 +273,24 @@ hmm3$fit(silent = TRUE)
 
 # Interpreting Results
 
-We can obtain the estimated parameters for states 1 and 2 by simply calling the fitted HMM object or `print_obspar()` and `print_tpm()` to print the estimated observation and transition probability parameters.
+To interpret the mode, we can look at the parameter estimates. Here, we will start with model 1, the simple 2-state model.
+
+We can obtain all the estimated parameters for states 1 and 2 by simply calling the fitted HMM object.
 
 ```{r, attr.source = ".numberLines"}
 # Print estimated parameters
 hmm1
+```
+
+We can also extract only the estimated parametesr of the observation model using `print_obspar()`.
+
+```{r, attr.source = ".numberLines"}
 hmm1$print_obspar()
 ```
 
 We observe that state 1 corresponds to relatively lower activity (i.e., lower 1-minute average ODBA), while state 2 represents higher activity.
+
+Similarly, we can extract only the estimated transition probability parameters using `print_tpm()`.
 
 ```{r, attr.source = ".numberLines"}
 hmm1$print_tpm()
