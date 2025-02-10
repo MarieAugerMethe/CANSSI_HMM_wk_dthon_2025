@@ -1,6 +1,6 @@
 ---
-title: 'CANSSI/UBC Datathon: XX SHORT TITLE'
-author: "XX YOUR NAME"
+title: 'CANSSI/UBC Datathon: Visitations patterns in blue-green spaces '
+author: "Asim Khanal"
 output:
   html_document: default
   word_document: default
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Data availability statement
 
-The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon and shared for educational purposes with accreditation (XX NAME OF PERSON TO BE ACCREDIATED). It cannot be used for any publication without written permission. Please contact XX NAME (XX EMAIL) for more information. 
+The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon. It cannot be used for any publication without written permission. The data was received from Mapbox Inc (https://www.mapbox.com/). through their educational partnership program. Please contact Asim Khanal (khanal.asim73\@gmail.com) for more information. 
 
 Let's load some of the packages needed.
 
@@ -25,6 +25,8 @@ library(dplyr)
 
 ## Description of the dataset
 
+Mapbox Inc. is a third-party source that provides movement data based on anonymized mobile GPS signals. In Mapbox datasets, visitation is indicated by the “activity index”, which is based on the density of smart devices within a 100 x 100 m grid cell. Mapbox Movement data are aggregations of movement activity for a given time span and geographic area. Thus, a high activity index within a grid cell can be both from a high density of smart devices or continuous movement of the same smart devices. In addition, the data is normalized for a given country (i.e., Canada) and each time interval is scaled to a baseline of the mean activity patterns for January of the respective year, making the obtained activity index unitless without any real-world equivalent, such as the density of people, number of smart devices, or time spent in an area.
+
 The dataset contains the data of XX WHAT IS THE DATA. The data covers a period of XX from XX to XX, with data every XX. XX ADD 3-5 SENTENCES EXPLAINING THE DATA. STATE IF THE DATA THERE IS MISSING DATA.
 
 
@@ -36,7 +38,11 @@ head(XX_NAME_DATA)
 ```
 
 
+In the dataset from 2022 which I’m sharing, there are 6 columns. First one is called geography and I’m not entirely sure but it’s a big number that apparently refers to the Metro Vancouver region. Second column is x-coordinate (longitude), and the third column is the y-coordinate (latitude). The fourth column is called “bounds” and seems to be the same as the third column (longitude). The fifth column is “agg_day_period” and represents the date. The last column titled “activity_index_total” provides the estimate for daily average visitation (density of people) in the corresponding coordinate.
+
 As you can see, the dataset contains these variables:
+
+
 
 - **XX**: XX_DESCRIPTION_OF VARIABLE
 INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
