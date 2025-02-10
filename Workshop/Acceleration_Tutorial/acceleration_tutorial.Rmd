@@ -164,26 +164,29 @@ obs1 <- Observation$new(n_states = 2,
 
 For convenience, we fix the initial state distribution to the stationary distribution of the transition probability matrix (tpm), and use default starting values for the tpm, which are 0.9 along the diagonal and 0.1 elsewhere.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Creating hidden model
 hid1 <- MarkovChain$new(n_states = 2,
                        initial_state = "stationary",
                        data = BlacktipB_1min)
 ```
 
-With these components specified, the HMM can be specified using `$fit(silent=T)`.
+To create the HMM, we combined the observation model and hidden state model using `$new()`.
+With these components specified, the HMM can be specified using `$fit(silent = TRUE)`.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Create and fit HMM object
 hmm1 <- HMM$new(obs = obs1, hid = hid1)
-hmm1$fit(silent=T)
+hmm1$fit(silent = TRUE)
 ```
+
+#MAM: is there something to check convergence?
 
 # Checking Model Fit
 
-We can assess the model fit by visualising the pseudo-residuals, which are a type of model residuals that account for the interdependence of observations. If the model fit is appropriate, a quantile-quantile (QQ) plot of the pseudo-residuals should follow a standard normal distribution and an autocorrelation plot should show no significance in lag. Pseudo-residuals can be calculated using the `$pseudores()`. 
+We can assess the model fit by visualising the pseudo-residuals, which are a type of model residuals that account for the interdependence of observations. If the model fit is appropriate, the pseudo-residuals should follow a standard normal distribution and as such should fall on a straight line in a quantile-quantile (QQ) plot. In addition, an autocorrelation plot of the pseudo-residuals should show no significance in lag. Pseudo-residuals can be calculated using the `$pseudores()`. 
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Compute pseudo-residuals
 pr <- hmm1$pseudores()
 {qqnorm(pr$ODBA_avg)
