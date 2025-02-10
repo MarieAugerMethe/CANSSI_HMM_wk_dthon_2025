@@ -44,12 +44,11 @@ The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to 
 
 5. Model selection 
 
-## Packages
+## Packages {-}
 
 In this tutorial, we use the `hmmTMB` package (Michelot 2022) in R to fit HMMs. This package offers flexibility in incorporating covariate effects. However, many other software packages are available for fitting HMMs, each with different model formulations and a focus on specific data types. More information on `hmmTMB` can be found [here](https://arxiv.org/pdf/2211.14139). 
 ```{r, attr.source = ".numberLines"}
-# Load R packages 
-library(readr)
+# Load R packages
 library(tidyverse)
 library(hmmTMB)
 ```
@@ -68,40 +67,17 @@ ODBA and VeDBA can be used to reduce the dimensionality of three-dimension accel
 
 ## Blacktip Reef Shark data {-}
 
-In this tutorial, we will be analyzing four days' worth of acceleration data from a free-ranging blacktip reef shark in the Palmyra Atoll located in the central Pacific Ocean. The acceleration data was collected from a 117-cm female shark (*Carcharhinus melanopterus*) species using a multisensor package. This package was attached to the shark's dorsal fin and recorded three-dimensional acceleration data at a rate of 20 Hz. It also recorded depth and water temperature at a rate of 1 Hz. After four days, the package, which was equipped with a VHF transmitter, detached from the shark and was retrieved from the water surface (Papastamatiou et al. 2015). To assess the shark's behaviour, the authors calculated the average ODBA over 1-second intervals, resulting in a dataset comprising of 320,214 observations. Consequently, the variables in the dataset consist of time of day, water temperature (in Celsius), depth (in meters), and ODBA.
+In this tutorial, we will be analyzing four days' worth of acceleration data from a free-ranging blacktip reef shark in the Palmyra Atoll located in the central Pacific Ocean. The acceleration data was collected from a 117-cm female shark (*Carcharhinus melanopterus*) species using a multisensor package. This package was attached to the shark's dorsal fin and recorded three-dimensional acceleration data at a rate of 20 Hz. It also recorded depth and water temperature at a rate of 1 Hz. After four days, the package, which was equipped with a VHF transmitter, detached from the shark and was retrieved from the water surface (Papastamatiou et al. 2015). To assess the shark's behaviour, the authors calculated the average ODBA over 1-second intervals, resulting in a dataset comprising of 320,214 observations.  High-resolution data is often preferred since it may capture fine-scale processes. However, a key drawback is the high autocorrelation among observations at finer time scales, which may violate the assumption of conditional independence between observations given the states. 
+
+In this tutorial, we use 1-minute averaged depth (in meters), temperature (in Celsius), and ODBA values to reduce both autocorrelation between observations and the time required for model fitting. Prior to averaging, we removed ODBA values that were larger than 2 from the analysis (< 0.1 \%), as these are considered potentially spurious outliers.
+
 
 ```{r, attr.source = ".numberLines"}
-# Load data 
-BlacktipB <- read_delim("BlacktipB.txt", 
-                        delim = "\t", escape_double = FALSE, 
-                        trim_ws = TRUE)
-
-# View data
-head(BlacktipB) 
-glimpse(BlacktipB)
-summary(BlacktipB$ODBA)
-```
-
-# Data processing {-}
-
-High-resolution data is often preferred since it may capture fine-scale processes. However, a key drawback is the high autocorrelation among observations at finer time scales, which may violate the assumption of conditional independence between observations given the states. In this tutorial, we use 1-minute averaged depth, temperature, and ODBA values to reduce both autocorrelation between observations and the time required for model fitting. Additionally, we treat ODBA values larger than 2 as outliers and remove them from the analysis.
-
-```{r}
-# Process the data
-BlacktipB_1min = BlacktipB %>% filter(ODBA <= 2) %>%            # Remove outliers
-  mutate(Time = as.POSIXct(Time,format = "%m/%d/%Y %H:%M")) %>% # Transform into time object
-  group_by(Time = floor_date(Time, unit = "1 min")) %>%         # Take 1-min averages
-  summarise(ODBA_avg = mean(ODBA),
-            temp_avg = mean(Temp),
-            depth_avg = mean(Depth)) %>%
-  ungroup() %>%
-  mutate(Time = as.POSIXct(Time,format = "%Y-%m-%d %H:%M:%S")) %>%
-  as.data.frame() 
-
-BlacktipB_1min$Time <- as.character(format(BlacktipB_1min$Time, "%Y-%m-%d %H:%M:%S"))
-write.csv(BlacktipB_1min, "blacktip_1min.csv", row.names = FALSE)
+# Load data
 BlacktipB_1min <- read.csv("blacktip_1min.csv")
-BlacktipB_1min <- BlacktipB_1min %>% mutate(Time = as.POSIXct(Time,format = "%Y-%m-%d %H:%M:%S"))
+# Format date time
+BlacktipB_1min <- BlacktipB_1min %>% 
+  mutate(Time = as.POSIXct(Time,format = "%Y-%m-%d %H:%M:%S"))
 ```
 
 The 1-min average ODBA time series is shown below. 
