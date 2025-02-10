@@ -215,7 +215,9 @@ We add this as a covariate to the transition probabilities when we believe that 
 fhid = ~s(TOD, bs="cc")
 ```
 
-One of the advantage of the package `hmmTMB` is its capacity to incorporate complex and non-linear relationship with covariates. Here, `~s(TOD, bs="cc")` represents TOD using a cyclic spline.
+One of the advantage of the package `hmmTMB` is its capacity to easily incorporate complex and non-linear relationship with covariates. Here, `~s(TOD, bs="cc")` represents TOD using a cyclic spline.
+
+#MAM: explain the bs = "cc"
 
 ```{r, attr.source = ".numberLines"}
 # Create hidden model
@@ -225,9 +227,11 @@ hid2 <- MarkovChain$new(n_states = 2,
                        data = BlacktipB_1min)
 ```
 
-We'll also have to update the `Observation$new()` and `HMM$new()` since we added a new column `TOD` to the dataframe. 
+We'll also have to update the `Observation$new()` and `HMM$new()` since we added a new column `TOD` to the dataframe.
 
-```{r}
+#MAM: I don't see any difference with the previous obsvertion model. Can you explain why you need to create obs2?
+
+```{r, attr.source = ".numberLines"}
 # Create observation model
 obs2 <- Observation$new(n_states = 2,
                        dists = list(ODBA_avg="gamma2"),
@@ -235,19 +239,19 @@ obs2 <- Observation$new(n_states = 2,
                        data=BlacktipB_1min)
 ```
 
-```{r}
+To help fit more complex model, we can use fitted simpler model to initialise the model. Here, we did this by including the first HMM in the argument `init`.
+
+```{r, attr.source = ".numberLines"}
 # Create and fit HMM object
 hmm2 <- HMM$new(obs = obs2, hid = hid2, init = hmm1)
-hmm2$fit(silent=T)
+hmm2$fit(silent = TRUE)
 ```
 
-Note: we can use the fitted simple HMM from earlier to initialise this HMM using the `init` argument.
+Alternatively, we may add time-of-day as a covariate to the state-dependent distribution when we believe that the covariate influences the observed acceleration (i.e., the 1-min avg ODBA values) within each state. 
 
-Alternatively, we may add this as a covariate to the state-dependent distribution when we believe that the time-of-day may influence the observed acceleration (i.e., the 1-min avg ODBA values) within each state. 
+Let's examine the effect of TOD on the mean parameter of the Gamma state-dependent distribution. Similarly, we update the `formulas` argument of `Observation$new()`.
 
-Let's examine the effect of TOD on the mean parameter of the Gamma state-dependent distribution Similarly, we update the `formulas` argument of `Observation$new()`.
-
-```{r}
+```{r, attr.source = ".numberLines"}
 # Formula for observation model
 fobs = list(ODBA_avg = list(mean = ~s(TOD, bs="cc")))
 ```
