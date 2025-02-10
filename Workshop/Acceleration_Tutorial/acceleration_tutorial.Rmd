@@ -97,6 +97,9 @@ BlacktipB_1min = BlacktipB %>% filter(ODBA <= 2) %>%            # Remove outlier
   ungroup() %>%
   mutate(Time = as.POSIXct(Time,format = "%Y-%m-%d %H:%M:%S")) %>%
   as.data.frame()
+
+write.csv(BlacktipB_1min, "blacktip_1min.csv", row.names = FALSE)
+BlacktipB_1min <- read.csv("blacktip_1min.csv")
 ```
 
 The 1-min average ODBA time series is shown below. 
