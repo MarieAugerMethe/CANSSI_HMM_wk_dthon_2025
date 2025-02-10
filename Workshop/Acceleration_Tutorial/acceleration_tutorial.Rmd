@@ -256,26 +256,26 @@ Let's examine the effect of TOD on the mean parameter of the Gamma state-depende
 fobs = list(ODBA_avg = list(mean = ~s(TOD, bs="cc")))
 ```
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Create observation model
 obs3 <- Observation$new(n_states = 2,
                        dists = list(ODBA_avg="gamma2"),
                        par = list(ODBA_avg=list(mean=mu1, sd=sigma1)),
                        formulas = fobs,
-                       data=BlacktipB_1min)
+                       data = BlacktipB_1min)
 ```
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Create and fit HMM object
 hmm3 <- HMM$new(obs = obs3, hid = hid1, init = hmm1)
-hmm3$fit(silent=T)
+hmm3$fit(silent = TRUE)
 ```
 
 # Interpreting Results
 
 We can obtain the estimated parameters for states 1 and 2 by simply calling the fitted HMM object or `print_obspar()` and `print_tpm()` to print the estimated observation and transition probability parameters.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Print estimated parameters
 hmm1
 hmm1$print_obspar()
@@ -283,7 +283,7 @@ hmm1$print_obspar()
 
 We observe that state 1 corresponds to relatively lower activity (i.e., lower 1-minute average ODBA), while state 2 represents higher activity.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 hmm1$print_tpm()
 ```
 
@@ -291,7 +291,7 @@ The probability of remaining in either states is much higher than the probabilit
 
 Using `plot_dist()`, we can visualise the estimated state-dependent distributions.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Plot estimated state-dependent distribution
 hmm1$plot_dist("ODBA_avg")
 ```
@@ -300,7 +300,7 @@ We observe that the low-activity distribution has higher density near zero, whil
 
 Additionally, we can determine the most likely sequence of states given the observed data using the Viterbi algorithm via `viterbi()`. This sequence can then be visualized using `plot_ts()`.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Viterbi algorithm
 BlacktipB_1min$hmm1_state <- factor(hmm1$viterbi())
 
@@ -315,7 +315,7 @@ Again, we observe that lower 1-min ODBA avg values are classified as state 1 (lo
 
 Similarly, we can determine the most probable state at a given time point using the forward-backward algorithm via `state_probs()`. 
 
-```{r}
+```{r, attr.source = ".numberLines"}
 BlacktipB_1min$pr_s2 <- hmm1$state_probs()[,2]
 ggplot(BlacktipB_1min, aes(Time, ODBA_avg, col = pr_s2)) +
 geom_point() +
@@ -327,7 +327,7 @@ There tends to be high uncertainty for observations with intermediate values and
 
 For the HMM with covariates in the transition probabilities, we can plot the stationary state probabilities to examine how the likelihood of the shark being in each state varies throughout the day.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Plot stationary distribution
 hmm2$plot("delta", var="TOD")
 ```
@@ -336,7 +336,7 @@ We observe that the shark is more likely to be in the low-activity state around 
 
 For the HMM with covariates in the state-dependent distribution, we can visualize the estimated mean parameter of the Gamma distribution over time to assess how the expected 1-minute average ODBA varies throughout the day.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Plot of observation parameter
 BlacktipB_1min$hmm3_state <- factor(hmm3$viterbi())
 hmm3$plot("obspar", "TOD", i = "ODBA_avg.mean") 
@@ -354,7 +354,7 @@ The Akaike Information Criteria (AIC) provides a measure of the trade-off betwee
 We can compare the AIC scores using the AIC function for our original HMM (`hmm1`), the added TOD covariate in the transition probabilities HMM (`hmm2`) and the added TOD covariate in the state-dependent mean parameters HMM (`hmm3`).
 
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Compute AIC
 data.frame(AIC(hmm1),
            AIC(hmm2),
@@ -367,7 +367,7 @@ Caveat: AIC and other model selection criteria are known to overestimate the tru
 
 In the context of shark behaviour (or that of many other marine animals), plotting the depth timeseries coloured according to the most likely state sequence can help with interpretation, especially in combination with prior knowledge about the ecology of your study species.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 #Subset the data frame to include only the first day ()
 BlacktipB_day1 <- BlacktipB_1min[1:1440,]
 
@@ -379,9 +379,6 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
   scale_y_reverse()+
   scale_color_manual(values = c("dodgerblue3","firebrick"))
 ```
-
-
-
 
 
 
