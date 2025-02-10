@@ -334,7 +334,7 @@ name = expression("Pr("~S[t]~"= 2)"))
 
 There tends to be high uncertainty for observations with intermediate values and some with lower values.
 
-For the HMM with covariates in the transition probabilities, we can plot the stationary state probabilities to examine how the likelihood of the shark being in each state varies throughout the day.
+For the second model, the HMM with time-of-day as a covariate in the transition probabilities, we can additionally plot the stationary state probabilities to examine how the likelihood of the shark being in each state varies throughout the day.
 
 ```{r, attr.source = ".numberLines"}
 # Plot stationary distribution
@@ -343,7 +343,7 @@ hmm2$plot("delta", var="TOD")
 
 We observe that the shark is more likely to be in the low-activity state around midday and more likely to be in the high-activity state outside these hours.
 
-For the HMM with covariates in the state-dependent distribution, we can visualize the estimated mean parameter of the Gamma distribution over time to assess how the expected 1-minute average ODBA varies throughout the day.
+For the third model, the HMM with time of day as a covariate in the state-dependent distribution, we can visualize how the estimated mean parameter of the Gamma distribution vary with time of day. This plot will allow us to assess how the expected 1-minute average ODBA varies throughout the day.
 
 ```{r, attr.source = ".numberLines"}
 # Plot of observation parameter
@@ -360,7 +360,7 @@ A similar effect of TOD is observed for the low-activity state (state 1), though
 
 The Akaike Information Criteria (AIC) provides a measure of the trade-off between model fit and complexity. It is commonly used as a model selection criterion to select for the most suitable model among a set of candidate models. Lower AIC scores indicate a better balance between model fit and complexity.
 
-We can compare the AIC scores using the AIC function for our original HMM (`hmm1`), the added TOD covariate in the transition probabilities HMM (`hmm2`) and the added TOD covariate in the state-dependent mean parameters HMM (`hmm3`).
+We can compare the AIC scores using the `AIC` function for our original HMM (`hmm1`), the model with TOD as a covariate in the transition probabilities HMM (`hmm2`), and the model with TOD as a covariate in the state-dependent mean parameters HMM (`hmm3`).
 
 
 ```{r, attr.source = ".numberLines"}
