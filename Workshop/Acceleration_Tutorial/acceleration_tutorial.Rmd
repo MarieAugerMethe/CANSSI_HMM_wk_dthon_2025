@@ -374,10 +374,10 @@ We observe that incorporating covariates in either the state-dependent distribut
 
 Caveat: AIC and other model selection criteria are known to overestimate the true number of states required for an HMM. Additionally, they are not always the most reliable method for selecting the "best" model, as other factors such as interpretability and biological relevance should also be considered.
 
-In the context of shark behaviour (or that of many other marine animals), plotting the depth timeseries coloured according to the most likely state sequence can help with interpretation, especially in combination with prior knowledge about the ecology of your study species.
+In the context of shark behaviour (or that of many other marine animals), plotting the depth time series coloured according to the most likely state sequence can help with interpretation, especially in combination with prior knowledge about the ecology of your study species.
 
 ```{r, attr.source = ".numberLines"}
-#Subset the data frame to include only the first day ()
+# Subset the data frame to include only the first day ()
 BlacktipB_day1 <- BlacktipB_1min[1:1440,]
 
 # Plot decoded states over depth 
@@ -389,7 +389,7 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
   scale_color_manual(values = c("dodgerblue3","firebrick"))
 ```
 
-
+# MAM: I'm not sure what you are getting at here. To me, this plot, if anything, indicates that the model is doing a poor job. Is that what you are trying to say?
 
 # Exercises {-}
 
