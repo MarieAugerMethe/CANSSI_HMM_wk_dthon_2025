@@ -146,20 +146,20 @@ Since the observed values range from 0.02 to 0.40, we can choose the initial val
 ```{r, attr.source = ".numberLines"}
 # Set initial parameters
 ## For state 1 and 2
-mu1 = c(.05,.09) 
-sigma1 = c(.03,.03) 
+mu1 <- c(.05,.09) 
+sigma1 <- c(.03,.03) 
 ```
 
-In `hmmTMB`, the observation and hidden state model are defined using `Observation$new()` and `MarkovChain$new()`, respectively.
+In `hmmTMB`, the observation and hidden state models are defined using `Observation$new()` and `MarkovChain$new()`, respectively.
 
 For the observation model, we set `n_states = 2` to specify a 2-state HMM. We define the distribution of `ODBA_avg` using `dists=list(ODBA_avg="gamma2")`, which fits a Gamma distribution parameterised in terms of its mean and SD (instead of shape and rate). The chosen starting values are then provided via the `par` argument.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Create observation model
 obs1 <- Observation$new(n_states = 2,
                        dists = list(ODBA_avg="gamma2"),
                        par = list(ODBA_avg=list(mean=mu1, sd=sigma1)),
-                       data=BlacktipB_1min)
+                       data = BlacktipB_1min)
 ```
 
 For convenience, we fix the initial state distribution to the stationary distribution of the transition probability matrix (tpm), and use default starting values for the tpm, which are 0.9 along the diagonal and 0.1 elsewhere.
