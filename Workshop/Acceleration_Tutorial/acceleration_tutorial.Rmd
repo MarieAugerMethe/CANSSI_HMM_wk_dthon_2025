@@ -202,22 +202,22 @@ Covariates can be added to either the transition probabilities (i.e., hidden mod
 
 For example, let's consider incorporating a time-of-day (TOD) as a covariate. 
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Add TOD covariate to dataframe
-BlacktipB_1min$TOD = as.numeric(format(BlacktipB_1min$Time, "%H")) +
-as.numeric(format(BlacktipB_1min$Time, "%M"))/60
+BlacktipB_1min$TOD <- as.numeric(format(BlacktipB_1min$Time, "%H")) +
+  as.numeric(format(BlacktipB_1min$Time, "%M"))/60
 ```
 
-We add this as covariate to the transition probabilities when we believe that the time-of-day may influence the probability of transitioning between states. To do so, we update the `formula` argument of `MarkovChain$new()` by specifying a formula that incorporates the `TOD` covariate.
+We add this as a covariate to the transition probabilities when we believe that the time-of-day may influence the probability of transitioning between states. To do so, we update the `formula` argument of `MarkovChain$new()` by specifying a formula that incorporates the `TOD` covariate.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Formula for hidden model
 fhid = ~s(TOD, bs="cc")
 ```
 
-Note: `~s(TOD, bs="cc")` is just a way to represent TOD using a cyclic spline.
+One of the advantage of the package `hmmTMB` is its capacity to incorporate complex and non-linear relationship with covariates. Here, `~s(TOD, bs="cc")` represents TOD using a cyclic spline.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Create hidden model
 hid2 <- MarkovChain$new(n_states = 2,
                        formula = fhid,
