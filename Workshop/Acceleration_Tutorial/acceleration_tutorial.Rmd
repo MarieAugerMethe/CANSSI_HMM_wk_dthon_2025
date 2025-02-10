@@ -56,7 +56,7 @@ Accelerometer devices measure up to three axes, which can be described relative 
 knitr::include_graphics("ODBA_pic.png")
 ```
 
-ODBA and VeDBA can be used to reduce the dimensionality of three-dimension acceleration data while retaining important information. 
+ODBA and VeDBA can be used to reduce the dimensionality of three-dimension acceleration data while retaining important information, and are often used as proxies of energy expenditure. 
 
 ## Blacktip Reef Shark data {-}
 
