@@ -117,7 +117,7 @@ BlacktipB_1min %>%
 
 Our first goal is to fit a basic 2-state HMM to the 1-min avg ODBA.
 
-Before doing so it's good to look at the data. This will help us decide what may be appropriate distributions and initial values.
+Before doing so it's good to look at the data. This will help us decide what may be appropriate distributions and starting values.
 
 ```{r, attr.source = ".numberLines"}
 hist(BlacktipB_1min$ODBA_avg, 
@@ -128,20 +128,22 @@ hist(BlacktipB_1min$ODBA_avg,
 
 The histogram of the 1-minute average ODBA values suggests that the data follows a Gamma distribution, so we use this distribution to model the observations. The Gamma distribution can be parameterized in terms of its mean and standard deviation (SD).
 
-To fit an HMM, we must select initial values for these parameters, which serve as the starting point for the numerical optimizer. Choosing reasonable starting values is crucial to avoid convergence to a local maximum rather than the true maximum likelihood estimate (MLE).
+To fit an HMM, we must select starting values for these parameters, which serve as the starting point for the numerical optimizer. Choosing reasonable starting values is crucial to avoid convergence to a local maximum rather than the true maximum likelihood estimate (MLE).
+
+# MAM: check consitency, swithc between initial and starting values. Here I changed for starting. Please check throughout and the slides of Fanny/Arturo that we are consitent.
 
 Several strategies can improve convergence to the MLE. One approach is to select starting values that are plausible based on the observed data. When fitting more complex models, such as those incorporating covariates, a useful strategy is to first fit simpler models and use their estimates to initialize more complex ones.
 
 We begin by inspecting the observed data.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 summary(BlacktipB_1min$ODBA_avg)
 sd(BlacktipB_1min$ODBA_avg)
 ```
 
 Since the observed values range from 0.02 to 0.40, we can choose the initial values for the mean of each state to be, for example, 0.05 and 0.09, with a standard deviation of 0.03 for both states.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 # Set initial parameters
 ## For state 1 and 2
 mu1 = c(.05,.09) 
