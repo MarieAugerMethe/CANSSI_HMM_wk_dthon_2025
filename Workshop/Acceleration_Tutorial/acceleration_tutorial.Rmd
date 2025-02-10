@@ -32,7 +32,7 @@ knitr::opts_chunk$set(message = FALSE)
 
 # Tutorial Objectives {-}
 
-The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to accelerometer data. We will cover the following topics:
+The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to time-series data. We will cover the following topics:
 
 1. Fitting a basic HMM 
 
