@@ -58,7 +58,7 @@ We also include an Extra section where you can explore:
 First, let's load the packages that we will need to complete the analyses. 
 Of course you need to have them installed first.
 
-```{r Load packages,include = FALSE, attr.source = ".numberLines"}
+```{r Load packages, attr.source = ".numberLines"}
 library(momentuHMM) # Package for fitting HMMs, builds on moveHMM
 library(raster)     # For importing and extracting raster spatial covariates
 library(dplyr)      # data management
@@ -75,13 +75,10 @@ library(geosphere)  # Needed to calculate step lengths from lat/lon locations - 
 
 While the `raster` package is being phased out in favour of the new `terra` package, `momentuHMM` still relies on the `raster` package to extract covariates. Therefore, for this tutorial we will still use `raster`, but we also use `terra` at times as it is most up-to-date package for rasters.
 
-Make sure to set working directory to "ISEC2024_HMM_workshop" of the HMM workshop folder:
+Make sure to set working directory to "2_Movement_Tutorial" folder of the HMM workshop folder.
 
-```{r, eval=FALSE, warning=FALSE, attr.source = ".numberLines"}
-setwd("1_Morning_Tutorial/Tutorial_files")
-```
+We will need the functions in the following file `utility_functions.R`.
 
-We will need the functions in the following file `utility_functions.R`
 ```{r load function, attr.source = ".numberLines"}
 source("utility_functions.R")
 ```
@@ -92,8 +89,6 @@ source("utility_functions.R")
 We will analyze a dataset containing movement tracks of three narwhals tagged with Fastloc-GPS tags. The dataset was provided by Dr. Marianne Marcoux (Fisheries and Oceans, Canada). 
 For simplicity, we only examine the fastloc-GPS data from two weeks in August 2017. 
 
-
-
 ```{r,fig.align='center',echo=F,out.width="40%"}
 
 knitr::include_graphics("./Photos/PaulNicklen.jpeg")
@@ -102,7 +97,7 @@ knitr::include_graphics("./Photos/PaulNicklen.jpeg")
 ```
 
 
-# Import data (with description and simple processing)
+## Import data (with description and simple processing)
 
 **HMMs assume that locations are taken at regular time steps and that there is negligible position error**. 
 For example, HMMs are adequate to use on data collected from tags that take
@@ -111,7 +106,7 @@ reprocessing, simple HMMs are not suitable for irregular times series
 of locations with large measurement error (e.g., you would
 need to preprocess Argos data before applying the type of HMMs presented in this tutorial).
 
-As is the case for the data of many aquatic species,the raw narwhal Fastloc-GPS data is collected at irregular time intervals (the time of locations is dictated partly with when they surface).  To simplify the tutorial, we have already regularized the tracks. 
+As is the case for the data of many aquatic species, the raw narwhal Fastloc-GPS data is collected at irregular time intervals (the time of locations is dictated partly with when they surface). To simplify the tutorial, we have already regularized the tracks. 
 Specifically, we have split tracks with data gaps of more than 1 hr into a subset of tracks, and have interpolating the locations at a 10 min interval using a continuous-time correlated random walk using the `momentuHMM` `crawlWrap` function. If interested in these pre-processing steps and decisions, see section \@ref(sec-narwhal-reg) below.
 
 Let's import the regularized narwhal movement data and convert the time column to an appropriate date format.
@@ -129,9 +124,9 @@ head(tracks_gps)
 
 The coordinates are in Lat/Lon (x = lon, y = lat).
 
-For some of the visualization, it's helpful to use a spatial object, and so we transform the track data into an `sf` object. The coordinate reference system of the original data (in this case WGS84, which is defined by the EPSG code `4326`).
+For some of the visualization, it's helpful to use a spatial object, and so we transform the track data into an `sf` object. The coordinate reference system of the original data is WGS84, which is defined by the EPSG code `4326`.
 
-```{r}
+```{r, attr.source = ".numberLines"}
 tracks_gps_sf <- tracks_gps %>% st_as_sf(coords = c("x", "y")) %>% st_set_crs(4326)
 ```
 
@@ -149,14 +144,14 @@ ggplot() +
   geom_spatial_path(data = tracks_gps, 
                     aes(x = x, y = y, colour=factor(ID)), crs = 4326) + 
   theme_classic() +
-  theme(panel.background = element_rect(fill = 'lightblue'))
-
+  theme(panel.background = element_rect(fill = 'lightblue')) +
+  coord_sf(expand = FALSE)
 ```
 
 We can see that even though its the data for only 3 narwhals, that there are more than 3 tracks. 
 These represent the split tracks we created every time we had a data gap longer than 1 hr.
 
-# Create data streams 
+## Create data streams 
 
 Steps and turns are a way to describe observed animal trajectories by measuring the distance between locations and the angle of the turns made between them. 
 
@@ -171,6 +166,8 @@ knitr::include_graphics("example_ta_sl.png")
 
 
 ```
+
+#MAM: I like the graph, but the representation of turning angle is slightly off. See https://www.researchgate.net/figure/Relationship-between-step-lengths-and-turning-angles-along-movement-path-recorded-for_tbl1_260084381 The way you have it what would be considered as not turning, would have an angle of 180.
 
 We will use these measurements as observations to fit a HMM. 
 
@@ -188,22 +185,17 @@ data <- prepData(tracks_gps, type = "LL")
 head(data)
 ```
 
-We can see that `prepData` has calculated the step length and the turning angle, and has extracted the bathymetry value at each location.  
+We can see that `prepData` has calculated the step length and the turning angle.  
 
 # Fit HMM to data 
 
-It is now possible to now to fit a HMM on this dataset and next we will explore this in the R package `momentuHMM`.
-
-The primary learning objectives of this part are:
-
-1. Fit simple HMMs using `momentuHMM`
-2. Checking model fit
-3. Determining number of states to use
+It is now possible to fit an HMM on this dataset using the R package `momentuHMM`.
 
 ## Fitting the model
 
-Our data is ready to use, and we are almost ready to fit the HMM (via the function `fitHMM`). 
+Our data are ready to use, and we are almost ready to fit the HMM via the function `fitHMM`. 
 We now need to make many important modelling decisions and most of these decisions will be associated with one of the arguments of the function. 
+
 The minimum arguments `fitHMM` requires are: `fitHMM(data, nbStates, dist, Par0)`. 
 
 1. When we fit a HMM, we need to decide the number of behavioural states we are going to model. 
@@ -256,7 +248,7 @@ So now, lets fit the following model:
 # define number of states
 nbState <- 2
 
-# define distribution to use for each data observation
+# define distributions to use for each data stream
 dist <- list(step = "gamma", angle = "vm")
 
 # Setting up the starting values
