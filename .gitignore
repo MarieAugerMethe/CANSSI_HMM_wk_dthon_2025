@@ -3,4 +3,6 @@
 
 .DS_Store
 
+*.RProj
 
+.Rproj.user
