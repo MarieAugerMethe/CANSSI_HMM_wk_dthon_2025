@@ -2,7 +2,6 @@
 title: "Installing packages"
 subtitle: "Tips to install some of the packages"
 author: "Marie Auger-Méthé, Joe Watson, & Ron Togunov"
-date: "26/07/2022"
 output: 
     html_document:
     number_sections: true
@@ -92,9 +91,10 @@ install.packages('raster', dep=TRUE)
 
 ### Packages available on CRAN without special dependencies
 
-The remaining packages do not have special dependencies, and should be easily installed or updated via CRAN (using install.packages()):
+The remaining packages should be easily installed or updated via CRAN (using install.packages()):
 
 + momentuHMM
++ hmmTMB
 + dplyr
 + tidyr
 + lubridate
@@ -113,13 +113,8 @@ Once all the packages are installed, you can check that they are properly instal
 library(sf)          # spatial data processing
 library(raster)      # old raster package
 library(momentuHMM)  # fitting HMMs
-library(dplyr)       # data management
-library(tidyr)       # data management
-library(lubridate)   # date management
+library(hmmTMB)      # fitting HMMs
+library(tidyverse)   # data management
 library(kableExtra)  # produce visually appealing tables
-library(ggOceanMaps) # plotting ocean maps
 library(ggspatial)   # plotting of spatial data
-library(ggplot2)     # plotting
-library(cowplot)     # plotting
-library(readr)       # read text files
 ```
