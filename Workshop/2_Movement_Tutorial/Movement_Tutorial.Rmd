@@ -912,16 +912,16 @@ Do the following questions.
 
 **Q5. Look at the pseudo residuals of the model. Do they indicate any issues with the model?**
 
-**Q6. Assess whether including time of day as a covariate in the transition probabilities improve the model fit. Interpret the results.**
+**Q6. Assess whether including time of day as a covariate in the transition probabilities improve the model fit. Interpret the results.** You need to read the extra section on covariates to be able to answer this question.
 
-**Q7. Check if using time of day changes the pseudo-residuals.**
+**Q7. Check if using time of day changes the pseudo-residuals.** You need to read the extra section on covariates to be able to answer this question.
 
 **Q8. What modification(s) could be done to improve the model?**
 
 The answers are found in section \@ref(sec-res-pb) below. But only peak if you are stuck, instead look at the narwhal code.
 
 
-## Code for polar bear data exercise {#sec-res-pb}
+## Polar bear exercise answers {#sec-res-pb}
 
 ### Q1. Fit a simple two-state HMMs.
 
@@ -942,7 +942,7 @@ hist(pb_data$angle, breaks=50,
      main = "", xlab = "turning angle")
 ```
 
-There is plenty of persistence in turning angle (very high peak at 0) and though hard to exactly pick out there are maybe two different peaks in step length, somehing around 0.2 and 1.7.
+There is plenty of persistence in turning angle (very high peak at 0) and though hard to exactly pick out there are maybe two different peaks in step length, something around 0.2 and 1.7.
 
 
 ```{r vis_pb_2, attr.source = ".numberLines"}
