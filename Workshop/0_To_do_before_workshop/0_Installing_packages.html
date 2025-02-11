@@ -352,7 +352,6 @@ display: none;
 <h1 class="title toc-ignore">Installing packages</h1>
 <h3 class="subtitle">Tips to install some of the packages</h3>
 <h4 class="author">Marie Auger-Méthé, Joe Watson, &amp; Ron Togunov</h4>
-<h4 class="date">26/07/2022</h4>
 
 </div>
 
@@ -426,19 +425,16 @@ install raster.</p>
 </div>
 <div id="packages-available-on-cran-without-special-dependencies" class="section level3">
 <h3>Packages available on CRAN without special dependencies</h3>
-<p>The remaining packages do not have special dependencies, and should
-be easily installed or updated via CRAN (using install.packages()):</p>
+<p>The remaining packages should be easily installed or updated via CRAN
+(using install.packages()):</p>
 <ul>
 <li>momentuHMM</li>
-<li>dplyr</li>
-<li>tidyr</li>
-<li>lubridate</li>
+<li>hmmTMB</li>
+<li>tidyverse</li>
 <li>kableExtra</li>
-<li>ggOceanMaps</li>
 <li>ggspatial</li>
-<li>ggplot2</li>
-<li>cowplot</li>
-<li>readr</li>
+<li>geosphere</li>
+<li>terra</li>
 </ul>
 </div>
 <div id="check-that-all-packages-are-installed" class="section level3">
@@ -448,15 +444,13 @@ properly installed by loading them.</p>
 <pre class="r"><code>library(sf)          # spatial data processing
 library(raster)      # old raster package
 library(momentuHMM)  # fitting HMMs
-library(dplyr)       # data management
-library(tidyr)       # data management
-library(lubridate)   # date management
+library(hmmTMB)      # fitting HMMs
+library(tidyverse)   # data management
 library(kableExtra)  # produce visually appealing tables
-library(ggOceanMaps) # plotting ocean maps
 library(ggspatial)   # plotting of spatial data
-library(ggplot2)     # plotting
-library(cowplot)     # plotting
-library(readr)       # read text files</code></pre>
+library(geosphere)   # to calculate step lengths from lat/lon locations
+library(terra)       # updated raster package
+library(tidyterra)   # data management</code></pre>
 </div>
 </div>
 

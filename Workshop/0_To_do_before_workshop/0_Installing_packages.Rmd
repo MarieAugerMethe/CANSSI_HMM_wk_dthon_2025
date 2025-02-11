@@ -95,15 +95,11 @@ The remaining packages should be easily installed or updated via CRAN (using ins
 
 + momentuHMM
 + hmmTMB
-+ dplyr
-+ tidyr
-+ lubridate
++ tidyverse
 + kableExtra
-+ ggOceanMaps
 + ggspatial
-+ ggplot2
-+ cowplot
-+ readr
++ geosphere
++ terra
 
 ### Check that all packages are installed
 
@@ -117,4 +113,7 @@ library(hmmTMB)      # fitting HMMs
 library(tidyverse)   # data management
 library(kableExtra)  # produce visually appealing tables
 library(ggspatial)   # plotting of spatial data
+library(geosphere)   # to calculate step lengths from lat/lon locations
+library(terra)       # updated raster package
+library(tidyterra)   # data management
 ```
