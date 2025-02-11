@@ -5,6 +5,9 @@ output:
   bookdown::html_document2:
     number_sections: true
     highlight: tango
+    toc: yes
+    toc_float: yes
+    theme: cosmo
 editor_options:
   chunk_output_type: console
 ---
@@ -84,7 +87,7 @@ source("utility_functions.R")
 ```
 
 
-# Movement data: Narwhals
+# Narwhal movement data
 
 We will analyze a dataset containing movement tracks of three narwhals tagged with Fastloc-GPS tags. The dataset was provided by Dr. Marianne Marcoux (Fisheries and Oceans, Canada). 
 For simplicity, we only examine the fastloc-GPS data from two weeks in August 2017. 
@@ -92,12 +95,10 @@ For simplicity, we only examine the fastloc-GPS data from two weeks in August 20
 ```{r,fig.align='center',echo=F,out.width="40%"}
 
 knitr::include_graphics("./Photos/PaulNicklen.jpeg")
-
-
 ```
 
 
-## Import data (with description and simple processing)
+## Import and vizualize data
 
 **HMMs assume that locations are taken at regular time steps and that there is negligible position error**. 
 For example, HMMs are adequate to use on data collected from tags that take
@@ -167,7 +168,6 @@ knitr::include_graphics("example_ta_sl.png")
 
 ```
 
-#MAM: I like the graph, but the representation of turning angle is slightly off. See https://www.researchgate.net/figure/Relationship-between-step-lengths-and-turning-angles-along-movement-path-recorded-for_tbl1_260084381 The way you have it what would be considered as not turning, would have an angle of 180.
 
 We will use these measurements as observations to fit a HMM. 
 
@@ -289,7 +289,7 @@ has smaller step lengths compared to state 2. The turning angle distributions of
 Based on this, we may label state 1 as "resident" and state 2 as "travel". 
 
 
-## Decoding the hidden sequence. 
+## Decoding the hidden sequence 
 
 We are interested in identifying when an animal is in each of the behavioural states (i.e., when the animal is in state 1 vs state 2), what its called state decoding. 
 We can use the function `viterbi`, which uses the Viterbi algorithm to produce the most likely sequence of states according to your fit model and data.
@@ -492,7 +492,7 @@ Let's import it  bathymetry data .
 bathy <- raster("data/bathy_4_narwhals.tiff")
 ```
 
-The raw bathymetry data used to create this raster was taken from the the GEBCO global ocean and land terrain model from https://pressbooks.bccampus.ca/ewemodel/chapter/getting-bathymetry/.Note that land values of the bathymetry layer are 0s. Let's plot the narwhal movement data over the bathymetry and land layers.
+The raw bathymetry data used to create this raster was taken from the the GEBCO global ocean and land terrain model from https://pressbooks.bccampus.ca/ewemodel/chapter/getting-bathymetry/. Note that land values of the bathymetry layer are 0s. Let's plot the narwhal movement data over the bathymetry and land layers.
 
 
 ```{r , warning=FALSE, attr.source = ".numberLines"}
@@ -500,12 +500,11 @@ ggplot() +
   geom_spatraster(data=rast(bathy)) +
   geom_sf(data=land, fill="beige") +
   geom_spatial_path(data = tracks_gps, 
-                    aes(x = x, y = y, colour=factor(ID)), crs = 4326) 
-  
-
+                    aes(x = x, y = y, colour=factor(ID)), crs = 4326)  +
+  coord_sf(expand = FALSE)
 ```
 
-One covariate we will explore is time of day. Lets derive it
+Another covariate we will explore is time of day. Let's derive it.
 
 ```{r prep, attr.source = ".numberLines"}
 # calculate time of day variable (for later use)
@@ -513,24 +512,13 @@ tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
 ```
 
 
+We need to re-calculate data streams (step lengths and turning angles) using the `prepData` function, but this time include our covariates. 
+For covariates that are part of the data frame with the location data, like time of day, we can use the argument `covNames` to distinguish these covariates from data streams. 
+For spatial covariates in the form of rasters, like bathymetry, we will extract the bathymetry values at the location using the argument `spatialCovs`.
 
-Next, we need to derive our data streams (step lengths and turning angles) and covariates. 
-One covariate we will explore is time of day, so we will derive it now.
+If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`.
 
-```{r prep3, attr.source = ".numberLines"}
-# calculate time of day variable (for later use)
-tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
-```
-
-Now, we will get our observation variables using the `prepData` function. 
-
-
-The argument `covNames` will distinguish our model covariates from data streams. 
-If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
-
-As mentioned above, we will also explore using bathymetry as a covariate. Thus, we will extract the bathymetry values at the location using the argument `spatialCovs`.
-
-```{r prep4, attr.source = ".numberLines"}
+```{r prep4, attr.source = ".numberLines", cache=TRUE}
 # calculate step length and turning angles
 data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
 
