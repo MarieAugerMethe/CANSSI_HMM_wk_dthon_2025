@@ -471,22 +471,11 @@ We can either include covariates on the transition probabilities (i.e., the stat
   
   * Does a covariate have an effect on the movement within each state?
 
-### Covariates on transition probabilities
+### Preparing data with covariates
 
-It's probably most common to include covariates on the transition probabilities in an HMM to assess how spatial, temporal, or demographic factors influence the state-switching dynamics.
-For example, prey density may increase the probability of switching into a foraging state or states may follow temporal patterns throughout the day.
-At time $t$, each transition probability is linked to covariates using a multinomial logit link
-	$$\gamma_{ij}^{(t)} = Pr(S_{t+1} = j \mid S_t = i) = \frac{\exp(\eta_{ij}^{(t)})}{\sum_{k=1}^{K}\exp(\eta_{ik}^{(t)})} $$
-	with $K$ states and the linear predictor for $P$ covariates $\{\omega_1^{(t)}, \omega_2^{(t)}, \dots \omega_P^{(t)}\}$ given as
-$$\eta_{ij}^{(t)} = \begin{cases}
-	\beta^{(ij)}_0 + \sum_{p=1}^{P} \beta_p^{(ij)} \omega_p^{(t)} & \text{if } i \neq j \\
-	0 & \text{otherwise.}
-	\end{cases} $$
-For each transition probability, $\beta_0^{(ij)}$ is an intercept parameter, and $\beta_p^{(ij)}$ measures the effect of the $p$-th covariate $\omega_p$.
+To understand how to include covariates in our model, we will look at two covariates.
 
-Here, we will will create a model where transition probabilities vary as a function of the bathymetry (i.e., depth of the ocean). Thus $\omega_1$ is the bathymetry value associated with that step and we can simply specify with a formula like the one used in simple linear models. 
-
-Let's import it  bathymetry data .
+First we will look at bathymetry (i.e., depth of the ocean).
 
 ```{r import_bathy, attr.source = ".numberLines"}
 bathy <- raster("data/bathy_4_narwhals.tiff")
@@ -511,7 +500,6 @@ Another covariate we will explore is time of day. Let's derive it.
 tracks_gps$tod <- hour(tracks_gps$time) + minute(tracks_gps$time) / 60
 ```
 
-
 We need to re-calculate data streams (step lengths and turning angles) using the `prepData` function, but this time include our covariates. 
 For covariates that are part of the data frame with the location data, like time of day, we can use the argument `covNames` to distinguish these covariates from data streams. 
 For spatial covariates in the form of rasters, like bathymetry, we will extract the bathymetry values at the location using the argument `spatialCovs`.
@@ -529,20 +517,24 @@ head(data)
 We can see that `prepData` has calculated the step length and the turning angle, and has extracted the bathymetry value at each location.  
 
 
+### Covariates on transition probabilities
+
+It's probably most common to include covariates on the transition probabilities in an HMM to assess how spatial, temporal, or demographic factors influence the state-switching dynamics.
+For example, prey density may increase the probability of switching into a foraging state or states may follow temporal patterns throughout the day.
+At time $t$, each transition probability is linked to covariates using a multinomial logit link
+	$$\gamma_{ij}^{(t)} = Pr(S_{t+1} = j \mid S_t = i) = \frac{\exp(\eta_{ij}^{(t)})}{\sum_{k=1}^{K}\exp(\eta_{ik}^{(t)})} $$
+	with $K$ states and the linear predictor for $P$ covariates $\{\omega_1^{(t)}, \omega_2^{(t)}, \dots \omega_P^{(t)}\}$ given as
+$$\eta_{ij}^{(t)} = \begin{cases}
+	\beta^{(ij)}_0 + \sum_{p=1}^{P} \beta_p^{(ij)} \omega_p^{(t)} & \text{if } i \neq j \\
+	0 & \text{otherwise.}
+	\end{cases} $$
+For each transition probability, $\beta_0^{(ij)}$ is an intercept parameter, and $\beta_p^{(ij)}$ measures the effect of the $p$-th covariate $\omega_p$.
+
+Here, we will will create a model where transition probabilities vary as a function of the bathymetry. Thus $\omega_1$ is the bathymetry value associated with that step and we can simply specify with a formula like the one used in simple linear models. 
+
 ```{r formula_bathy, cache = TRUE, attr.source = ".numberLines"}
 formula_bathy <- ~bathy
 ```
-
-The argument `covNames` will distinguish our model covariates from data streams (not needed if we are are not using covariates). If there are missing covariate values, the default is to fill the missing value with the nearest value. This can be reasonable for spatial covariates, but wouldn't be sensible for a covariate such as time of day. We have no missing covariate values, so it's not a concern, but this is something to be aware of when using `prepData`. 
-
-```{r, attr.source = ".numberLines"}
-# calculate step length and turning angles
-data <- prepData(tracks_gps, type = "LL", covNames = "tod", spatialCovs = list(bathy = bathy))
-
-# take a peak at the data
-head(data)
-```
-
 
 As done earlier, we need to specify initial parameters and we will use the function `getPar0` to do so. This will use the estimated parameters of a previously fitted 2-state model with no covariates. 
 Note that it will set the unknown linear predictor parameters to 0, and use the intercept of the previous model. 
@@ -587,14 +579,14 @@ Here it looks like the "resident" behaviour is less common than the "travelling"
 ### Covariates in the observation model
 
 Now we will illustrate how to model mean step length as a function of a  covariate. 
-Any parameter in the observation model (e.g., mean or sd of the step lengths, or turning angle parameters) can be modelled as a function of a covariate, which allows for the movement behaviour within each discrete state to vary. 
+Any parameter in the observation model (e.g., mean or sd of the step lengths, or turning angle parameters) can be modelled as a function of covariates, which allows for the movement behaviour within each discrete state to vary. 
 
 Here, we will model mean step length based on the time of day.
 Since time of day is a cyclic covariate, we must define a relationship that ensures that the mean step length are similar at the very end and very beginning of the day. 
 We can do this by specify the mean step length as a trigonometric (i.e., cyclic) function of time of day (defined as $\tau$),
 
 $$\mu_{i}^{(t)} = \alpha^{(i)}_0 + \alpha_1^{(i)} \cos \left(\frac{2 \pi \tau_t}{24}\right) +  \alpha_2^{(i)} \sin \left(\frac{2 \pi \tau_t}{24}\right) $$
-where 24 refers for the 24-hour period of interest. This relationhip can conveniently be specified with the `cosinor` function. 
+where 24 refers for the 24-hour period of interest. This relationship can conveniently be specified with the `cosinor` function. 
 
 ```{r sformual_tod, message = FALSE, cache = TRUE, attr.source = ".numberLines"}
 # set new formula
@@ -638,7 +630,7 @@ This shows that the mean step within each state varies based on time of day, wit
 As the observation data (i.e., the data stream: step lengths and turning angles) are the same between these models and the models above, we can use AIC to compare models with and without time of day effects.
 
 ```{r AIC_htides_HMMs, attr.source = ".numberLines", collapse=TRUE}
-AIC(mod)  # without time of day
+AIC(mod)  # without covariates
 AIC(mod_tpm)  # bathymetry effect on transition probabilities
 AIC(mod_obs)  # time of day effect on observation parameters
 ```
@@ -646,46 +638,6 @@ AIC(mod_obs)  # time of day effect on observation parameters
 This indicates that the model with a time-varying mean step length is the best fitting model. 
 
 For all of these new models, we have not check the starting values nor their fit as tutorial time is limited. However, these checks should be done for all models fitted, and special care should be made to check the final selected model.
-
-## Exercises
-
-Here we will use polar bear GPS data of one adult female from:
-Derocher, Andrew, 2021, "Replication Data for: Togunov RR, Derocher AE, Lunn NJ, Auger-Méthé M. 2021. Characterising menotatic behaviours in movement data using hidden Markov models, Methods in Ecology and Evolution, https://doi.org/10.7939/DVN/QYMAYV.
-
-Here we only extracted the locations data from this dataset. It's the data from one female polar bear from April 5, 2011 to May 5, 2011. The collar collected GPS data every 30 min, and the 8 missing locations were imputted using a continuous-time correlated random walk as shown below for the narwhals (section \@ref(sec-ctcrw)). More information can be found in: Togunov RR, Derocher AE, Lunn NJ, Auger-Méthé M. 2021. Characterising menotatic behaviours in movement data using hidden Markov models. Methods in Ecology and Evolution 12: 1984-1998. 
-
-Let's read the data and convert the time to a time format.
-
-```{r import_pb_data, attr.source = ".numberLines"}
-pb <- read.csv("data/pb_track.csv") %>%
-  mutate(time = ymd_hm(time))
-```
-
-```{r}
-head(pb)
-```
-
-The column time is the date and time at which the GPS location was obtained by telemetry collar, while coordinates are in degrees longitude and latitude (Unprojected locations in WGS84 (EPSG:4326). 
-Do the following questions.
-
-**Q1. Fit a simple two-state HMM.**
-
-**Q2. Look at the state-dependent distribution and describe the movement characteristics associated with each behavioural states.**
-
-**Q3. Identify what proportion of time is spent in each behaviour.**
-
-**Q4. Plot the track with the decoded behavioural state.**
-
-**Q5. Look at the pseudo residuals of the model. Do they indicate any issues with the model?**
-
-**Q6. Assess whether including time of day as a covariate in the transition probabilities improve the model fit. Interpret the results.**
-
-**Q7. Check if using time of day changes the pseudo-residuals.**
-
-**Q8. What modification(s) could be done to improve the model?**
-
-The answers are found in section \@ref(sec-res-pb) below. But only peak if you are stuck, instead look at the narwhal code.
-
 
 
 ## Handling irregular data {#sec-narwhal-reg}
@@ -721,12 +673,13 @@ ggplot() +
   geom_spatraster(data=rast(bathy)) +
   geom_sf(data=land, fill="beige") +
   geom_spatial_path(data = tracks_gps_O, 
-                    aes(x = x, y = y, colour=factor(ID)), crs = 4326) 
+                    aes(x = x, y = y, colour=factor(ID)), crs = 4326) +
+  coord_sf(expand = FALSE)
 
 ```
 
 
-## Selecting a time interval for the HMM
+### Selecting a time interval for the HMM
 
 An HMM assumes the observations are collected in discrete time and that there is no missing data in the predictor variables. When the data is irregular, there are two key decisions we must make, (1) the temporal resolution to use, and (2) how to address data gaps. The desired resolution depends predominantly on the biological question you are asking, as different behaviours and biological processes occur at different spatial and temporal scales (e.g., seasonal migration, daily movement between foraging and resting grounds, and fine scale foraging decisions). Generally, higher resolution data is preferred as it has more information. However, it is possible to have too-high of a resolution wherein information from fine-scale variability drowns out the signal from coarse-scale patterns of interest (e.g., seasonal migration). A good rule of thumb, is that you want 3-50 data points per behaviour. For behaviours spanning several hours, that roughly corresponds to a desired resolution between 2 min and 60 min.
 
@@ -781,7 +734,7 @@ This is a lot, but choosing finer resolutions would likely bias the results.
 
 For this tutorial, we will use a $10$ min resolution, though in many cases we may want to be more conservative and use a 30 min resolution.
 
-## Handling data gaps 
+### Handling data gaps 
 
 There are several ways to deal with data gaps:
 
@@ -927,6 +880,46 @@ mute <- mapply(function(data, col) {
 ```
 
 Notice how in some areas the different simulations have generally good agreement in the likely location during gaps, while in others they diverge. Multiple imputation can be particularly powerful if we want to incorporate environmental variables, as spatially explicit variables can be extracted for each simulated track to sample the most likely conditions encountered by the animal.
+
+# Exercises
+
+Here we will use polar bear GPS data of one adult female from:
+Derocher, Andrew, 2021, "Replication Data for: Togunov RR, Derocher AE, Lunn NJ, Auger-Méthé M. 2021. Characterising menotatic behaviours in movement data using hidden Markov models, Methods in Ecology and Evolution, https://doi.org/10.7939/DVN/QYMAYV.
+
+Here we only extracted the locations data from this dataset. It's the data from one female polar bear from April 5, 2011 to May 5, 2011. The collar collected GPS data every 30 min, and the 8 missing locations were imputted using a continuous-time correlated random walk as shown below for the narwhals (section \@ref(sec-ctcrw)). More information can be found in: Togunov RR, Derocher AE, Lunn NJ, Auger-Méthé M. 2021. Characterising menotatic behaviours in movement data using hidden Markov models. Methods in Ecology and Evolution 12: 1984-1998. 
+
+Let's read the data and convert the time to a time format.
+
+```{r import_pb_data, attr.source = ".numberLines"}
+pb <- read.csv("data/pb_track.csv") %>%
+  mutate(time = ymd_hm(time))
+```
+
+```{r}
+head(pb)
+```
+
+The column time is the date and time at which the GPS location was obtained by telemetry collar, while coordinates are in degrees longitude and latitude (Unprojected locations in WGS84 (EPSG:4326). 
+Do the following questions.
+
+**Q1. Fit a simple two-state HMM.**
+
+**Q2. Look at the state-dependent distribution and describe the movement characteristics associated with each behavioural states.**
+
+**Q3. Identify what proportion of time is spent in each behaviour.**
+
+**Q4. Plot the track with the decoded behavioural state.**
+
+**Q5. Look at the pseudo residuals of the model. Do they indicate any issues with the model?**
+
+**Q6. Assess whether including time of day as a covariate in the transition probabilities improve the model fit. Interpret the results.**
+
+**Q7. Check if using time of day changes the pseudo-residuals.**
+
+**Q8. What modification(s) could be done to improve the model?**
+
+The answers are found in section \@ref(sec-res-pb) below. But only peak if you are stuck, instead look at the narwhal code.
+
 
 ## Code for polar bear data exercise {#sec-res-pb}
 
