@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Data availability statement
 
 
-The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon and shared for educational purposes with accreditation (XX NAME OF PERSON TO BE ACCREDIATED). It cannot be used for any publication without written permission. Please contact XX NAME (XX EMAIL) for more information. 
+The dataset for this activity is available in the file *fish_data.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon and shared for educational purposes with accreditation (Isabella Morgante, Juliano Palacios Abrantes, Muhammed Oyinlola & William Cheung). It cannot be used for any publication without written permission. Please contact Isabella Morgante (i.morgante@oceans.ubc.ca) & Juliano Palacios Abrantes (j.palacios@oceans.ubc.ca) for more information. 
 
 Let's load some of the packages needed.
 
@@ -34,8 +34,8 @@ For each species, 2 simulations are available – one where there is no fishing 
 Let's read the data into R and have a quick peak at it.
 
 ```{r data.load}
-XX_NAME_DATA <- read.csv("XX_NAME_OF_DATA_FILE.csv")
-head(XX_NAME_DATA)
+fish_sim <- read.csv("fish_data.csv")
+head(fish_sim)
 ```
 
 
