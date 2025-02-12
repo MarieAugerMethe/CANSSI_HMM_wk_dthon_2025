@@ -107,8 +107,6 @@ The histogram of the 1-minute average ODBA values suggests that the data follows
 
 To fit an HMM, we must select starting values for these parameters, which serve as the starting point for the numerical optimizer. Choosing reasonable starting values is crucial to avoid convergence to a local maximum rather than the true maximum likelihood estimate (MLE).
 
-# MAM: check consitency, swithc between initial and starting values. Here I changed for starting. Please check throughout and the slides of Fanny/Arturo that we are consitent.
-
 Several strategies can improve convergence to the MLE. One approach is to select starting values that are plausible based on the observed data. When fitting more complex models, such as those incorporating covariates, a useful strategy is to first fit simpler models and use their estimates to initialize more complex ones.
 
 We begin by inspecting the observed data.
@@ -371,7 +369,7 @@ ggplot(BlacktipB_day1, aes(x=Time, y=depth_avg))+
   scale_color_manual(values = c("dodgerblue3","firebrick"))
 ```
 
-# MAM: I'm not sure what you are getting at here. To me, this plot, if anything, indicates that the model is doing a poor job. Is that what you are trying to say?
+Here, the behavioural states do not appear to have a systematic relationship with the depth at which the shark is. If we think that behavioural states should be linked to the depth of the shark, it would be important to add depth as either a new data stream or as a covariate in the transition probability matrix.
 
 # Exercises {-}
 
