@@ -39,8 +39,8 @@ head(fish_sim)
 
 As you can see, the dataset contains these variables:
 
-- **Abd:** Total fish abundance (with fishing)
-- **Abd_noCatch:** Total fish abundance (with no fishing)
+- **Abd:** Total fish abundance (for simulations with fishing)
+- **Abd_noCatch:** Total fish abundance (for simulations without fishing)
 - **Catch:** Total fish catch
 - **SST:** mean sea surface temperature (°C)
 - **FMort:** mean fishing mortality
@@ -51,10 +51,21 @@ As you can see, the dataset contains these variables:
 
 ### Quick visualization
 
+Plot of the simulations when there is no fishing.
+
+```{r}
+plot_sims_no_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
+  geom_line(aes(y = Abd_noCatch, colour = CommonName), size = 1) +
+  ylab("Fish abundance")
+plot_sims_no_fishing
+```
+
+Plot of the simulations when there is fishing.
+
 ```{r}
 # Scale to be able to plot both axes
 sc <- 100
-ggplot(data = fish_sim, aes(x = Year)) +
+plot_sims_with_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
   geom_line(aes(y = Abd, colour = CommonName), size = 1) +
   geom_line(aes(y = Catch*sc, colour = CommonName), size = 0.5, lty = 2) +
   scale_y_continuous(
@@ -63,9 +74,9 @@ ggplot(data = fish_sim, aes(x = Year)) +
     name = "Fish abundance",
     
     # Add a second axis and specify its features
-    sec.axis = sec_axis(~.*sc, name="Fish catch (dashed)")
-  )
-  
+    sec.axis = sec_axis(~.*sc, name="Fish catch (dashed)"))
+
+plot_sims_with_fishing
 ```
 
 ## Datathon goal
