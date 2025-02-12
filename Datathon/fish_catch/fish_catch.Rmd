@@ -1,6 +1,6 @@
 ---
-title: 'CANSSI/UBC Datathon: XX SHORT TITLE'
-author: "XX YOUR NAME"
+title: 'CANSSI/UBC Datathon: simulated global fish catch'
+author: "Isabella Morgante"
 output:
   html_document: default
   word_document: default
@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Data availability statement
+
 
 The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon and shared for educational purposes with accreditation (XX NAME OF PERSON TO BE ACCREDIATED). It cannot be used for any publication without written permission. Please contact XX NAME (XX EMAIL) for more information. 
 
@@ -25,7 +26,9 @@ library(dplyr)
 
 ## Description of the dataset
 
-The dataset contains the data of XX WHAT IS THE DATA. The data covers a period of XX from XX to XX, with data every XX. XX ADD 3-5 SENTENCES EXPLAINING THE DATA. STATE IF THE DATA THERE IS MISSING DATA.
+This dataset contains simulations of total annual global fish catch and abundance for three fish species from 1850 - 2010. The simulations were run using the Dynamic Bioclimatic Envelope Model (DBEM), a global fisheries model by Cheung et al. (2011) and fishing effort data from the Fisheries Model Intercomparison Project (FishMIP).
+
+For each species, 2 simulations are available – one where there is no fishing occurs and a second where fishing is applied. All simulations were run under the same environmental conditions. The annual average fishing mortality (a proportion of maximum sustainable yield)  and the annual average sea surface temperature (°C) each species was exposed to is also provided.
 
 
 Let's read the data into R and have a quick peak at it.
