@@ -17,10 +17,8 @@ The dataset for this activity is available in the file *fish_data.csv* shared vi
 
 Let's load some of the packages needed.
 
-```{r}
-library(ggplot2)
-library(lubridate)
-library(dplyr)
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
 ```
 
 
@@ -41,8 +39,18 @@ head(fish_sim)
 
 As you can see, the dataset contains these variables:
 
-- **XX**: XX_DESCRIPTION_OF VARIABLE
-INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
+- **Abd:** Total fish abundance (with fishing)
+- **Abd_noCatch:** Total fish abundance (with no fishing)
+- **Catch:** Total fish catch
+- **SST:** mean sea surface temperature (°C)
+- **FMort:** mean fishing mortality
+- **Year:** year of data
+- **TaxonID:** identification code of the fish species
+- **TaxonName:** Scientific name of the fish species
+- **CommonName:** Common name of the fish species
+
+### Quick visualization
+
 
 
 ## Datathon goal
