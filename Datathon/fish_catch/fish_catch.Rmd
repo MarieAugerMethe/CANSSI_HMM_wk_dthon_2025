@@ -1,5 +1,5 @@
 ---
-title: 'CANSSI/UBC Datathon: simulated global fish catch'
+title: 'CANSSI/UBC Datathon: what explain rapid declines in fish abudance'
 author: "Isabella Morgante"
 output:
   html_document: default
@@ -19,6 +19,7 @@ Let's load some of the packages needed.
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
+library(ggpubr) # to combine ggplots
 ```
 
 
@@ -26,7 +27,7 @@ library(tidyverse)
 
 This dataset contains simulations of total annual global fish catch and abundance for three fish species from 1850 - 2010: European anchovy, Chub mackerel, and European pilchard. The simulations were run using the Dynamic Bioclimatic Envelope Model (DBEM), a global fisheries model by Cheung et al. (2011) and fishing effort data from the Fisheries Model Intercomparison Project (FishMIP).
 
-For each species, 2 simulations are available – one where there is no fishing occurs and a second where fishing is applied. All simulations were run under the same environmental conditions. The annual average fishing mortality (a proportion of maximum sustainable yield)  and the annual average sea surface temperature (°C) each species was exposed to is also provided.
+For each species, 2 simulations are available – one where there is no fishing occurs and a second where fishing is applied. All simulations were run under the same environmental conditions. The annual average fishing mortality (a proportion of maximum sustainable yield) and the annual average sea surface temperature (°C) each species was exposed to is also provided.
 
 
 Let's read the data into R and have a quick peak at it.
@@ -51,13 +52,18 @@ As you can see, the dataset contains these variables:
 
 ### Quick visualization
 
-Plot of the simulations when there is no fishing.
+Plots of simulated data with temperature and fishing
 
 ```{r}
+# Average temperature used in simulations (averaged over the range of the fish)
+plot_temp <- ggplot(data = fish_sim, aes(x = Year)) +
+  geom_line(aes(y = SST, colour = CommonName), size = 1) +
+  ylab("Temperatue")
+
+# Simulated fish abundance when there is no fishing
 plot_sims_no_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
   geom_line(aes(y = Abd_noCatch, colour = CommonName), size = 1) +
   ylab("Fish abundance")
-plot_sims_no_fishing
 ```
 
 Plot of the simulations when there is fishing.
@@ -76,7 +82,9 @@ plot_sims_with_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
     # Add a second axis and specify its features
     sec.axis = sec_axis(~.*sc, name="Fish catch (dashed)"))
 
-plot_sims_with_fishing
+
+ggarrange(plot_temp, plot_sims_no_fishing, plot_sims_with_fishing, 
+          ncol = 1, common.legend = TRUE)
 ```
 
 ## Datathon goal
@@ -85,7 +93,19 @@ The goals are (1) to provide a road map of how to tackle the questions listed be
 
 ### Questions:
 
-XX LIST THE QUESTIONS YOU WANT TO ANSWER WITH THE DATA. KEEP IN MIND THAT HIDDEN MARKOV MODEL WILL TAKE A TIME SERIES AND FIND HIDDEN STATES WITHIN IT. USUALLY YOU WILL HAVE 3-4 HIDDEN STATES.
+The main goal is to understand what conditions create a rapid decline in the population. Specifically, the questions to answer are:
+
+- Do the different fish species experience a rapid decline in abundance? If so, when does this happen?
+
+- Is a rapid decline relate to a particular condition in the fishing mortality or sea surface temperature (e.g., is the rapid decline link to a specific increase in fishing mortality)?
+
+Here the main interest is identifying the cause of a rapid decline in fish abundance. The four hidden states we may be interested in identifying could be: increase in abundance, stable, slow decline, rapid decline.
+
+If interested in rate of change the variable to model may not be simply abundance, but potentially rate of change in abundance. In addition, think about how the covariates could be included in the model (linear vs other options related to heat tolerance of the fish) and the potential for interactions between temperature and fishing mortality.
+
+### MAM: Izzy: can you give info on the heat tolerance of the 3 species of fish explored here?
+
+### MAM: Izzy: can you also give me the full ref for William's paper.
 
 ## Acknowledgments
 
