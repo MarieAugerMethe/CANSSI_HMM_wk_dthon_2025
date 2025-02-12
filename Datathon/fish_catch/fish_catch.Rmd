@@ -34,6 +34,9 @@ Let's read the data into R and have a quick peak at it.
 ```{r data.load}
 fish_sim <- read.csv("fish_data.csv")
 head(fish_sim)
+fish_sim <- fish_sim %>% filter(CommonName != "Mediterranean horse mackerel")
+unique(fish_sim$CommonName)
+write.csv(fish_sim, "fish_data.csv", row.names = FALSE)
 ```
 
 
@@ -51,7 +54,11 @@ As you can see, the dataset contains these variables:
 
 ### Quick visualization
 
-
+```{r}
+ggplot(data = fish_sim) +
+  geom_line(aes(x = Year, y = Abd, colour = CommonName))
+  
+```
 
 ## Datathon goal
 
