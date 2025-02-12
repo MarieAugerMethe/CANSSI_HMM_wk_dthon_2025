@@ -24,7 +24,7 @@ library(tidyverse)
 
 ## Description of the dataset
 
-This dataset contains simulations of total annual global fish catch and abundance for three fish species from 1850 - 2010. The simulations were run using the Dynamic Bioclimatic Envelope Model (DBEM), a global fisheries model by Cheung et al. (2011) and fishing effort data from the Fisheries Model Intercomparison Project (FishMIP).
+This dataset contains simulations of total annual global fish catch and abundance for three fish species from 1850 - 2010: European anchovy, Chub mackerel, and European pilchard. The simulations were run using the Dynamic Bioclimatic Envelope Model (DBEM), a global fisheries model by Cheung et al. (2011) and fishing effort data from the Fisheries Model Intercomparison Project (FishMIP).
 
 For each species, 2 simulations are available – one where there is no fishing occurs and a second where fishing is applied. All simulations were run under the same environmental conditions. The annual average fishing mortality (a proportion of maximum sustainable yield)  and the annual average sea surface temperature (°C) each species was exposed to is also provided.
 
@@ -34,9 +34,6 @@ Let's read the data into R and have a quick peak at it.
 ```{r data.load}
 fish_sim <- read.csv("fish_data.csv")
 head(fish_sim)
-fish_sim <- fish_sim %>% filter(CommonName != "Mediterranean horse mackerel")
-unique(fish_sim$CommonName)
-write.csv(fish_sim, "fish_data.csv", row.names = FALSE)
 ```
 
 
@@ -55,8 +52,19 @@ As you can see, the dataset contains these variables:
 ### Quick visualization
 
 ```{r}
-ggplot(data = fish_sim) +
-  geom_line(aes(x = Year, y = Abd, colour = CommonName))
+# Scale to be able to plot both axes
+sc <- 100
+ggplot(data = fish_sim, aes(x = Year)) +
+  geom_line(aes(y = Abd, colour = CommonName), size = 1) +
+  geom_line(aes(y = Catch*sc, colour = CommonName), size = 0.5, lty = 2) +
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Fish abundance",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*sc, name="Fish catch (dashed)")
+  )
   
 ```
 
