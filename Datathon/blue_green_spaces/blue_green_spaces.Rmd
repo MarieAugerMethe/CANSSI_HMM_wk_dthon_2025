@@ -17,9 +17,7 @@ The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv
 Let's load some of the packages needed.
 
 ```{r}
-library(ggplot2)
-library(lubridate)
-library(dplyr)
+library(tidyverse)
 ```
 
 
@@ -47,6 +45,56 @@ As you can see, the dataset contains these variables:
 - **XX**: XX_DESCRIPTION_OF VARIABLE
 INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
 
+
+```{r, eval=FALSE, echo=FALSE}
+library(sf)
+library(mapview)
+land <- read.csv("Land-polygons-with-coordinates-TABLE_10th_Feb_HMM_workshop.csv")
+van_parks <- land %>% filter(Jurisdiction == "Vancouver")
+gps_data <- read.csv("vancouver_data_Jan_2022.csv")
+head(gps_data)
+gps_data <- gps_data %>% filter(!is.na(xlon) & !is.na(xlat))
+
+gps_data_sf <- st_as_sf(gps_data, coords = c("xlon","xlat"), remove=FALSE)
+
+
+st_crs(gps_data_sf) <- 4326 #WGS 84
+# ggplot() +
+#   geom_sf(data = gps_data_sf)
+# 
+# 
+# mapview(gps_data_sf,
+#         layer.name=" ")
+
+# Selected park, by eye
+gps_data_sf_chosen <- gps_data_sf[c(2657, 6819, 7158, 8182, 9357, 10564, 11054, 19219, 21988, 23052, 23884, 24354, 27842),
+                                  ]
+mapview(gps_data_sf_chosen,
+        layer.name=" ")
+
+gps_data_sf_chosen2 <- st_intersection(gps_data_sf, gps_data_sf_chosen)
+
+gps_data_sf_chosen2 <- gps_data_sf[which(!is.na(match(gps_data_sf$bounds, gps_data_sf_chosen$bounds))),]
+
+mapview(gps_data_sf_chosen2,
+        layer.name=" ")
+
+as.data.frame(gps_data_sf_chosen2)
+
+```
+
+
+```{r}
+
+cell_id <- 1
+cell_in_park <- function(cell_id, gps_data, van_parks){
+  van_parks %>% filter(x.coord.MIN <= gps_data[cell_id, "xlon"] & 
+                         x.coord.MAX >= gps_data[cell_id, "xlon"],
+                       x.coord.MIN <= gps_data[cell_id, "xlon"] & 
+                         x.coord.MAX >= gps_data[cell_id, "xlon"])
+  
+}
+```
 
 ## Datathon goal
 
