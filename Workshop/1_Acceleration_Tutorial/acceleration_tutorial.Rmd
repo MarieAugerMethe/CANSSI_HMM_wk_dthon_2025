@@ -47,6 +47,7 @@ The goal of this tutorial is to practice fitting hidden Markov models (HMMs) to 
 ## Packages {-}
 
 In this tutorial, we use the `hmmTMB` package (Michelot 2022) in R to fit HMMs. This package offers flexibility in incorporating covariate effects. However, many other software packages are available for fitting HMMs, each with different model formulations and a focus on specific data types. More information on `hmmTMB` can be found [here](https://arxiv.org/pdf/2211.14139). 
+
 ```{r, attr.source = ".numberLines"}
 # Load R packages
 library(tidyverse)
@@ -148,15 +149,16 @@ hid1 <- MarkovChain$new(n_states = 2,
 ```
 
 To create the HMM, we combined the observation model and hidden state model using `$new()`.
-With these components specified, the HMM can be specified using `$fit(silent = TRUE)`.
+
+With these components specified, the HMM can be fitted using `$fit()`. By default, the fit function sets `silent=FALSE` which prints messages related to the model fitting process and will print a warning or error message if convergence issues arise. For the interest of space, we set `silent=TRUE` in the subsequent model fitting. 
 
 ```{r, attr.source = ".numberLines"}
 # Create and fit HMM object
 hmm1 <- HMM$new(obs = obs1, hid = hid1)
-hmm1$fit(silent = TRUE)
+hmm1$fit()
 ```
 
-#MAM: is there something to check convergence?
+There appears to be no convergence issues for the fitted model here.
 
 # Checking Model Fit
 
@@ -191,9 +193,7 @@ We add this as a covariate to the transition probabilities when we believe that 
 fhid = ~s(TOD, bs="cc")
 ```
 
-One of the advantage of the package `hmmTMB` is its capacity to easily incorporate complex and non-linear relationship with covariates. Here, `~s(TOD, bs="cc")` represents TOD using a cyclic spline.
-
-#MAM: explain the bs = "cc"
+One of the advantages of the package `hmmTMB` is its capacity to easily incorporate complex and non-linear relationship with covariates. Here, we represent TOD as a cyclic function using `~s(TOD, bs="cc")`. This creates a smooth function with `bs="cc"` specifying cyclic cubic regression splines. Smooth terms in `hmmTMB` are specified using syntax from the `mgcv` package in R. 
 
 ```{r, attr.source = ".numberLines"}
 # Create hidden model
@@ -203,9 +203,14 @@ hid2 <- MarkovChain$new(n_states = 2,
                        data = BlacktipB_1min)
 ```
 
-We'll also have to update the `Observation$new()` and `HMM$new()` since we added a new column `TOD` to the dataframe.
+To help fit more complex model, we can use fitted simpler model to initialise the model. Here, we did this by including the first HMM in the argument `init`.
 
-#MAM: I don't see any difference with the previous obsvertion model. Can you explain why you need to create obs2?
+```{r, attr.source = ".numberLines", error=TRUE}
+# Create and fit HMM object
+hmm2 <- HMM$new(obs = obs1, hid = hid2, init = hmm1)
+```
+
+It appears that `hmmTMB` treats the dataframe with the newly added `TOD` column as a different dataframe and we cannot re-use the observation object from `hmm1`. We will have to recreate the observation object, and consequently, the hmm object, using this "new" dataframe. 
 
 ```{r, attr.source = ".numberLines"}
 # Create observation model
@@ -215,12 +220,11 @@ obs2 <- Observation$new(n_states = 2,
                        data=BlacktipB_1min)
 ```
 
-To help fit more complex model, we can use fitted simpler model to initialise the model. Here, we did this by including the first HMM in the argument `init`.
 
 ```{r, attr.source = ".numberLines"}
 # Create and fit HMM object
 hmm2 <- HMM$new(obs = obs2, hid = hid2, init = hmm1)
-hmm2$fit(silent = TRUE)
+hmm2$fit(silent=TRUE)
 ```
 
 Alternatively, we may add time-of-day as a covariate to the state-dependent distribution when we believe that the covariate influences the observed acceleration (i.e., the 1-min avg ODBA values) within each state. 
@@ -246,6 +250,8 @@ obs3 <- Observation$new(n_states = 2,
 hmm3 <- HMM$new(obs = obs3, hid = hid1, init = hmm1)
 hmm3$fit(silent = TRUE)
 ```
+
+Interestingly, the "new" dataframe is being recognised as the same from earlier and we can simply re-use the hidden model `hid1`. 
 
 # Interpreting Results
 
