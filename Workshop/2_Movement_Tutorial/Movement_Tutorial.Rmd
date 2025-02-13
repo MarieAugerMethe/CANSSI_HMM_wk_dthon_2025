@@ -1,6 +1,6 @@
 ---
 title: 'Hidden Markov Models: Basics for animal movement data' 
-author: "Marie Auger-Méthé, Fanny Dupont, Ron Togunov, Natasha Klappstein, Arturo Esquivel"
+author: "Marie Auger-Méthé, Fanny Dupont, Ron Togunov, Natasha Klappstein, Arturo Esquivel, Marco Gallegos Herrada, Sofia Ruiz Suarez"
 output: 
   bookdown::html_document2:
     number_sections: true
@@ -61,7 +61,7 @@ We also include an Extra section where you can explore:
 First, let's load the packages that we will need to complete the analyses. 
 Of course you need to have them installed first.
 
-```{r Load packages, attr.source = ".numberLines"}
+```{r Load packages, attr.source = ".numberLines", message = FALSE, warning = FALSE}
 library(momentuHMM) # Package for fitting HMMs, builds on moveHMM
 library(raster)     # For importing and extracting raster spatial covariates
 library(dplyr)      # data management
@@ -90,7 +90,7 @@ source("utility_functions.R")
 # Narwhal movement data
 
 We will analyze a dataset containing movement tracks of three narwhals tagged with Fastloc-GPS tags. The dataset was provided by Dr. Marianne Marcoux (Fisheries and Oceans, Canada). 
-For simplicity, we only examine the fastloc-GPS data from two weeks in August 2017. 
+For simplicity, we only examine the fastloc-GPS data from one week in August 2017. 
 
 ```{r,fig.align='center',echo=F,out.width="40%"}
 
@@ -128,12 +128,13 @@ The coordinates are in Lat/Lon (x = lon, y = lat).
 For some of the visualization, it's helpful to use a spatial object, and so we transform the track data into an `sf` object. The coordinate reference system of the original data is WGS84, which is defined by the EPSG code `4326`.
 
 ```{r, attr.source = ".numberLines"}
-tracks_gps_sf <- tracks_gps %>% st_as_sf(coords = c("x", "y")) %>% st_set_crs(4326)
+tracks_gps_sf <- tracks_gps %>% st_as_sf(coords = c("x", "y")) %>% 
+  st_set_crs(4326)
 ```
 
 To get a reference of where these narwhals are swimming, let's import a land layer.
 
-```{r import_land, attr.source = ".numberLines"}
+```{r import_land, results = 'hide', attr.source = ".numberLines"}
 land <- st_read("data/NorthBaffin.shp")
 ```
 
@@ -391,6 +392,7 @@ The function `fitHMM` also has the argument `retryFits` which perturbs the param
 Let’s try (this will take a few minutes).
 
 ```{r retryfits, message=FALSE, attr.source = ".numberLines", cache=TRUE}
+
 # Fit the same 2-state HMM with retryFits
 # This is a random pertubation, so setting the seed to get the same results
 set.seed(29)
@@ -662,7 +664,10 @@ tracks_gps_O <- tracks_gps_O %>%
   # remove missing locations
   filter(!is.na(x) & !is.na(y),
          # remove identical records
-         !(time == lag(time) & x == lag(x) & y == lag(y) & loc_class == lag(loc_class)))
+         !(time == lag(time) & 
+             x == lag(x) & 
+             y == lag(y) & 
+             loc_class == lag(loc_class)))
 ```
 
 Let's plot the data over the bathymetry and land layers we have imported at the beginning of the tutorial.
@@ -699,7 +704,8 @@ Let's see what resolutions may be possible in the data by looking at the most fr
 # Visualise time differences (all and zoomed)
 par(mfrow = c(1, 2))
 hist(tracks_gps_O$dt, 1000, main = NA, xlab = "Time difference (min)")
-hist(tracks_gps_O$dt, 1000, main = NA, xlab = "Time difference (min)", xlim = c(0,100))
+hist(tracks_gps_O$dt, 1000, main = NA, xlab = "Time difference (min)",
+     xlim = c(0,100))
 ```
 
 ```{r calc_track_dt2, attr.source = ".numberLines", collapse=TRUE}
