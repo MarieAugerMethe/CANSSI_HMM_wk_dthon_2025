@@ -34,9 +34,7 @@ The dataset contains the data of XX WHAT IS THE DATA. The data covers a period o
 
 land <- read.csv("Land-polygons-with-coordinates-TABLE_10th_Feb_HMM_workshop.csv")
 van_parks <- land %>% filter(Jurisdiction == "Vancouver")
-gps_data <- read.csv("vancouver_data_Jan_2022.csv")
-#gps_data <- read.csv("vancouver_data_2022.csv")
-head(gps_data)
+gps_data <- read.csv("vancouver_data_2022.csv")
 gps_data <- gps_data %>% filter(!is.na(xlon) & !is.na(xlat))
 
 gps_data_sf <- st_as_sf(gps_data, coords = c("xlon","xlat"), remove=FALSE)
@@ -56,7 +54,6 @@ gps_data_sf_chosen <- gps_data_sf[c(2657, 6819, 7158, 8182, 9357, 10564, 11054, 
 mapview(gps_data_sf_chosen,
         layer.name=" ")
 
-gps_data_sf_chosen2 <- st_intersection(gps_data_sf, gps_data_sf_chosen)
 
 gps_data_sf_chosen2 <- gps_data_sf[which(!is.na(match(gps_data_sf$bounds, gps_data_sf_chosen$bounds))),]
 
@@ -69,13 +66,15 @@ gps_data_sf_chosen2 <- as.data.frame(gps_data_sf_chosen2)
 gps_data_sf_chosen2 <- gps_data_sf_chosen2 %>% 
   mutate(cellID = as.numeric(as.factor(bounds))) %>%
   group_by(cellID)
-
-# Days with no activity
-ts <- data.frame(date = rep(seq(ymd("2022-01-01"), ymd("2022-01-31"), by="day"), 13),
-                 cellID = rep(1:13, each = 31))
-
 gps_data_sf_chosen2 <- gps_data_sf_chosen2 %>%
   mutate(date = ymd(agg_day_period)) 
+
+# Days with no activity
+ts <- seq(ymd("2022-01-01"), max(gps_data_sf_chosen2$date), by="day")
+ts <- data.frame(date = rep(ts, 13),
+                 cellID = rep(1:13, each = length(ts)))
+
+
 
 gps_data_chosen3 <- full_join(ts, gps_data_sf_chosen2) %>%
   group_by(cellID) %>%
@@ -86,7 +85,7 @@ gps_data_chosen3 <- full_join(ts, gps_data_sf_chosen2) %>%
 
 gps_data_chosen3 <- gps_data_chosen3 %>% replace_na(list(activity_index_total = 0))
   
-write.csv(gps_data_chosen3, "van_13_gps_jan_2022.csv", row.names = FALSE)
+write.csv(gps_data_chosen3, "van_13_gps_2022.csv", row.names = FALSE)
 
 ```
 
@@ -95,7 +94,7 @@ write.csv(gps_data_chosen3, "van_13_gps_jan_2022.csv", row.names = FALSE)
 Let's read the data into R and have a quick peak at it.
 
 ```{r data.load}
-parks_activity <- read.csv("van_13_gps_jan_2022.csv")
+parks_activity <- read.csv("van_13_gps_2022.csv")
 # Make cellID a factor
 parks_activity$cellID <- as.factor(parks_activity$cellID)
 # Make date a date object
@@ -132,7 +131,8 @@ Let's look at the change in activity level through time.
 
 ```{r}
 plot_act <- ggplot(data = parks_activity) +
-  geom_line(aes(x = date, y = activity_index_total, colour = cellID), size = 1) +
+  geom_line(aes(x = date, y = activity_index_total)) +
+  facet_wrap(~ cellID, ncol=2) +
   ylab("Activity levels")
 plot_act
 ```
