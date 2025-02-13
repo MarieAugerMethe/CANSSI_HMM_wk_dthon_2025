@@ -58,7 +58,7 @@ Plots of simulated data with temperature and fishing
 # Average temperature used in simulations (averaged over the range of the fish)
 plot_temp <- ggplot(data = fish_sim, aes(x = Year)) +
   geom_line(aes(y = SST, colour = CommonName), size = 1) +
-  ylab("Temperatue")
+  ylab("Temperature")
 
 # Simulated fish abundance when there is no fishing
 plot_sims_no_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
