@@ -27,7 +27,7 @@ library(mapview) # To quickly map
 
 Mapbox Inc. is a third-party source that provides movement data based on anonymized mobile GPS signals. In Mapbox datasets, visitation is indicated by the “activity index”, which is based on the density of smart devices within a 100 x 100 m grid cell. Mapbox Movement data are aggregations of movement activity for a given time span and geographic area. Thus, a high activity index within a grid cell can be both from a high density of smart devices or continuous movement of the same smart devices. In addition, the data is normalized for a given country (i.e., Canada) and each time interval is scaled to a baseline of the mean activity patterns for January of the respective year, making the obtained activity index unitless without any real-world equivalent, such as the density of people, number of smart devices, or time spent in an area.
 
-The dataset contains the data of XX WHAT IS THE DATA. The data covers a period of XX from XX to XX, with data every XX. XX ADD 3-5 SENTENCES EXPLAINING THE DATA. STATE IF THE DATA THERE IS MISSING DATA.
+Here, we selected 13 cells found in a park and assumed that if Mapbox Inc did not report a activity value for a given day, the activity level was 0.
 
 
 ```{r, eval=FALSE, echo=FALSE}
@@ -102,16 +102,16 @@ parks_activity$date <- ymd(parks_activity$date)
 head(parks_activity)
 ```
 
-
-
-In the dataset from 2022 which I’m sharing, there are 6 columns. First one is called geography and I’m not entirely sure but it’s a big number that apparently refers to the Metro Vancouver region. Second column is x-coordinate (longitude), and the third column is the y-coordinate (latitude). The fourth column is called “bounds” and seems to be the same as the third column (longitude). The fifth column is “agg_day_period” and represents the date. The last column titled “activity_index_total” provides the estimate for daily average visitation (density of people) in the corresponding coordinate.
-
 As you can see, the dataset contains these variables:
 
 
+- **cellID:** identification number of the cell selected (each associated with a park in Vancouver)
+- **date:** date of the activity information (ranging from Jan 1 2022 to Dec 31 2022)
+- **lon:** longitude of the cell center
+- **lat:** latitude of the cell center
+- **activity_index_total:**  estimate for daily average visitation (density of people) in the cell
+- **bounds:** limit of the cell
 
-- **XX**: XX_DESCRIPTION_OF VARIABLE
-INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
 
 ### Quick visualization
 
@@ -122,7 +122,7 @@ Let's map the cells that were selected.
 parks_sf <- st_as_sf(parks_activity, coords = c("lon","lat"), remove=FALSE)
 st_crs(parks_sf) <- 4326 #Coordinate system: WGS 84
 
-mapview(parks_sf,
+mapview(parks_sf, zcol = "cellID",
         layer.name=" ")
 
 ```
@@ -132,7 +132,7 @@ Let's look at the change in activity level through time.
 ```{r}
 plot_act <- ggplot(data = parks_activity) +
   geom_line(aes(x = date, y = activity_index_total)) +
-  facet_wrap(~ cellID, ncol=2) +
+  facet_wrap(~ cellID, ncol=3) +
   ylab("Activity levels")
 plot_act
 ```
@@ -144,7 +144,13 @@ The goals are (1) to provide a road map of how to tackle the questions listed be
 
 ### Questions:
 
-XX LIST THE QUESTIONS YOU WANT TO ANSWER WITH THE DATA. KEEP IN MIND THAT HIDDEN MARKOV MODEL WILL TAKE A TIME SERIES AND FIND HIDDEN STATES WITHIN IT. USUALLY YOU WILL HAVE 3-4 HIDDEN STATES.
+The general goal is to understand what may be affecting the visitation patterns and see if  we predict the visitation patterns for subsequent years. Given the dataset we have at hand we can explore the following questions:
+
+- Are there weekly or seasonal patterns in the data?
+
+Here the main interest is identifying patterns in visitations. Three hidden states we may be interested in identifying could be: low, medium, and high visitation.
+
+**Things to think about:** Cells may differ in what is high levels, as such in may be important to consider things like random effects emission distributions. Especially as the number of cell included increases, it may be important to look at unexplained spatial autocorrelation.
 
 ## Acknowledgments
 
