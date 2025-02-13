@@ -79,7 +79,30 @@ gps_data_sf_chosen2 <- gps_data_sf[which(!is.na(match(gps_data_sf$bounds, gps_da
 mapview(gps_data_sf_chosen2,
         layer.name=" ")
 
-as.data.frame(gps_data_sf_chosen2)
+gps_data_sf_chosen2 <- as.data.frame(gps_data_sf_chosen2)
+
+# Create cell index and group by it
+gps_data_sf_chosen2 <- gps_data_sf_chosen2 %>% 
+  mutate(cellID = as.numeric(as.factor(bounds))) %>%
+  group_by(cellID)
+
+# Days with no activity
+ts <- data.frame(date = rep(seq(ymd("2022-01-01"), ymd("2022-01-31"), by="day"), 13),
+                 cellID = rep(1:13, each = 31))
+
+gps_data_sf_chosen2 <- gps_data_sf_chosen2 %>%
+  mutate(date = ymd(agg_day_period)) 
+
+gps_data_chosen3 <- full_join(ts, gps_data_sf_chosen2) %>%
+  group_by(cellID) %>%
+  mutate(lon = na.omit(unique(xlon)),
+         lat = na.omit(unique(xlat)),
+         bounds = na.omit(unique(bounds))) %>%
+  select(cellID, date, lon, lat, activity_index_total, bounds)
+
+gps_data_chosen3 <- gps_data_chosen3 %>% replace_na(list(activity_index_total = 0))
+  
+write.csv(gps_data_chosen3, "van_13_gps_jan_2022.csv", row.names = FALSE)
 
 ```
 
