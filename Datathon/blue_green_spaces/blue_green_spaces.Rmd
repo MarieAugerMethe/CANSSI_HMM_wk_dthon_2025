@@ -16,8 +16,10 @@ The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv
 
 Let's load some of the packages needed.
 
-```{r}
+```{r, message=FALSE, warnings=FALSE}
 library(tidyverse)
+library(sf) # For spatial data
+library(mapview) # To quickly map
 ```
 
 
@@ -28,27 +30,8 @@ Mapbox Inc. is a third-party source that provides movement data based on anonymi
 The dataset contains the data of XX WHAT IS THE DATA. The data covers a period of XX from XX to XX, with data every XX. XX ADD 3-5 SENTENCES EXPLAINING THE DATA. STATE IF THE DATA THERE IS MISSING DATA.
 
 
-Let's read the data into R and have a quick peak at it.
-
-```{r data.load}
-XX_NAME_DATA <- read.csv("XX_NAME_OF_DATA_FILE.csv")
-head(XX_NAME_DATA)
-```
-
-
-In the dataset from 2022 which I’m sharing, there are 6 columns. First one is called geography and I’m not entirely sure but it’s a big number that apparently refers to the Metro Vancouver region. Second column is x-coordinate (longitude), and the third column is the y-coordinate (latitude). The fourth column is called “bounds” and seems to be the same as the third column (longitude). The fifth column is “agg_day_period” and represents the date. The last column titled “activity_index_total” provides the estimate for daily average visitation (density of people) in the corresponding coordinate.
-
-As you can see, the dataset contains these variables:
-
-
-
-- **XX**: XX_DESCRIPTION_OF VARIABLE
-INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
-
-
 ```{r, eval=FALSE, echo=FALSE}
-library(sf)
-library(mapview)
+
 land <- read.csv("Land-polygons-with-coordinates-TABLE_10th_Feb_HMM_workshop.csv")
 van_parks <- land %>% filter(Jurisdiction == "Vancouver")
 gps_data <- read.csv("vancouver_data_Jan_2022.csv")
@@ -107,17 +90,24 @@ write.csv(gps_data_chosen3, "van_13_gps_jan_2022.csv", row.names = FALSE)
 ```
 
 
-```{r}
 
-cell_id <- 1
-cell_in_park <- function(cell_id, gps_data, van_parks){
-  van_parks %>% filter(x.coord.MIN <= gps_data[cell_id, "xlon"] & 
-                         x.coord.MAX >= gps_data[cell_id, "xlon"],
-                       x.coord.MIN <= gps_data[cell_id, "xlon"] & 
-                         x.coord.MAX >= gps_data[cell_id, "xlon"])
-  
-}
+Let's read the data into R and have a quick peak at it.
+
+```{r data.load}
+XX_NAME_DATA <- read.csv("XX_NAME_OF_DATA_FILE.csv")
+head(XX_NAME_DATA)
 ```
+
+
+In the dataset from 2022 which I’m sharing, there are 6 columns. First one is called geography and I’m not entirely sure but it’s a big number that apparently refers to the Metro Vancouver region. Second column is x-coordinate (longitude), and the third column is the y-coordinate (latitude). The fourth column is called “bounds” and seems to be the same as the third column (longitude). The fifth column is “agg_day_period” and represents the date. The last column titled “activity_index_total” provides the estimate for daily average visitation (density of people) in the corresponding coordinate.
+
+As you can see, the dataset contains these variables:
+
+
+
+- **XX**: XX_DESCRIPTION_OF VARIABLE
+INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
+
 
 ## Datathon goal
 
