@@ -35,6 +35,7 @@ The dataset contains the data of XX WHAT IS THE DATA. The data covers a period o
 land <- read.csv("Land-polygons-with-coordinates-TABLE_10th_Feb_HMM_workshop.csv")
 van_parks <- land %>% filter(Jurisdiction == "Vancouver")
 gps_data <- read.csv("vancouver_data_Jan_2022.csv")
+#gps_data <- read.csv("vancouver_data_2022.csv")
 head(gps_data)
 gps_data <- gps_data %>% filter(!is.na(xlon) & !is.na(xlat))
 
@@ -94,9 +95,14 @@ write.csv(gps_data_chosen3, "van_13_gps_jan_2022.csv", row.names = FALSE)
 Let's read the data into R and have a quick peak at it.
 
 ```{r data.load}
-XX_NAME_DATA <- read.csv("XX_NAME_OF_DATA_FILE.csv")
-head(XX_NAME_DATA)
+parks_activity <- read.csv("van_13_gps_jan_2022.csv")
+# Make cellID a factor
+parks_activity$cellID <- as.factor(parks_activity$cellID)
+# Make date a date object
+parks_activity$date <- ymd(parks_activity$date)
+head(parks_activity)
 ```
+
 
 
 In the dataset from 2022 which I’m sharing, there are 6 columns. First one is called geography and I’m not entirely sure but it’s a big number that apparently refers to the Metro Vancouver region. Second column is x-coordinate (longitude), and the third column is the y-coordinate (latitude). The fourth column is called “bounds” and seems to be the same as the third column (longitude). The fifth column is “agg_day_period” and represents the date. The last column titled “activity_index_total” provides the estimate for daily average visitation (density of people) in the corresponding coordinate.
@@ -107,6 +113,29 @@ As you can see, the dataset contains these variables:
 
 - **XX**: XX_DESCRIPTION_OF VARIABLE
 INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
+
+### Quick visualization
+
+Let's map the cells that were selected.
+
+```{r}
+# Create spatial object to map quickly
+parks_sf <- st_as_sf(parks_activity, coords = c("lon","lat"), remove=FALSE)
+st_crs(parks_sf) <- 4326 #Coordinate system: WGS 84
+
+mapview(parks_sf,
+        layer.name=" ")
+
+```
+
+Let's look at the change in activity level through time.
+
+```{r}
+plot_act <- ggplot(data = parks_activity) +
+  geom_line(aes(x = date, y = activity_index_total, colour = cellID), size = 1) +
+  ylab("Activity levels")
+plot_act
+```
 
 
 ## Datathon goal
