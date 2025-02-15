@@ -19,13 +19,11 @@ library(mapview) # To quickly map
 
 ## Data availability statement
 
-The dataset for this activity is available in the file *gull_6tags_data.csv* shared via Github (https://github.com/MarieAugerMethe/..). It cannot be used for any publication without written permission. Please contact *Marie Auger-Méthé* (*auger-methe@stat.ubc.ca*) for more information. 
+The dataset for this activity is available in the file *gull_6tags_data.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It cannot be used for publication/research without written permission. Please contact *Marie Auger-Méthé* (*auger-methe@stat.ubc.ca*) for more information. 
 
 ## Description of the dataset
 
 The dataset contains the data of six glaucous-winged gulls, tagged on an island located off the coast of Vancouver Island. The data covers a period of one month in July 2023. It includes speed, GPS, and acceleration data.
-
-
 
 ```{r data.load}
 # Read data
@@ -69,6 +67,7 @@ plot_speed <- ggplot(data = gulls) +
   geom_line(aes(x = UTC_datetime, y = speed_km.h, colour = device_id)) 
 plot_speed
 ```
+
 ## Datathon goal
 
 The goals are (1) to provide a road map of how to tackle the questions listed below, (2) attempt to complete at least the first step of your road map, and (3) provide interpretation of the results. Make a quick 5-minute presentation explaining what your team did.
