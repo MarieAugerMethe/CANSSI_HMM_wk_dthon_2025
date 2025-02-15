@@ -1,0 +1,91 @@
+---
+title: "ForCANSSII"
+output: html_document
+author: "Shabnam Shadloo"
+date: "2025-02-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(sf) # For spatial data
+library(mapview) # To quickly map
+```
+
+
+## Data availability statement
+
+The dataset for this activity is available in the file *gull_6tags_data.csv* shared via Github (https://github.com/MarieAugerMethe/..). It cannot be used for any publication without written permission. Please contact *Marie Auger-Méthé* (*auger-methe@stat.ubc.ca*) for more information. 
+
+## Description of the dataset
+
+The dataset contains the data of six glaucous-winged gulls, tagged on an island located off the coast of Vancouver Island. The data covers a period of one month in July 2023. It includes speed, GPS, and acceleration data.
+
+
+
+```{r data.load}
+# Read data
+gulls <- read.csv("gull_6tags_data.csv")
+# Format columns
+gulls$UTC_datetime <- ymd_hms(gulls$UTC_datetime)
+gulls$device_id <- as.factor(gulls$device_id)
+head(gulls)
+```
+
+The data was collected approximately every 15 minutes, though some times may be missing. This will need to be accounted for.
+
+As you can see, the dataset contains these variables:
+
+- **device_id:** Name of the device, can be viewed as the gull individual ID.
+- **UTC_datetime:** Time in UTC, note that the birds are close to Vancouver, so in Pacific time zone.
+- **Latitude:** latitude of GPS location, some have NAs
+- **Longitude:** longitude of GPS location, some have NAs
+- **speed_km.h**: instantaneous speed (km/h), potentially helpful in identifying different behaviours (resting, swimming, and flying)
+- **acc_x, acc_y, acc_z**: acceleration in the x, y, and z axes. The unit is mg. We might need to remove the gravity force. 
+- **Toxoplasmosis:** whether the gull is infected with Toxoplasmosis or not.
+
+
+## Quick visualization
+
+Let's map the movement of the gulls
+
+```{r visualizing}
+gulls_sf <- st_as_sf(gulls %>% filter(!is.na(Longitude)), coords = c("Longitude","Latitude"), remove=FALSE)
+st_crs(gulls_sf) <- 4326 #Coordinate system: WGS 84
+
+mapview(gulls_sf, zcol = "device_id",
+        layer.name=" ")
+```
+
+
+Let's look at the change in speed through time.
+
+```{r}
+plot_speed <- ggplot(data = gulls) +
+  geom_line(aes(x = UTC_datetime, y = speed_km.h, colour = device_id)) 
+plot_speed
+```
+## Datathon goal
+
+The goals are (1) to provide a road map of how to tackle the questions listed below, (2) attempt to complete at least the first step of your road map, and (3) provide interpretation of the results. Make a quick 5-minute presentation explaining what your team did.
+
+### Questions:
+
+The general goal is to understand what whether toxoplasmosis affects the activity patterns of the gulls and in general better understanding the behavioural patterns of these animals. Specifically, we can address the following questions:
+
+- Is the transition probability between behavioural states different between infected and uninfected gulls?
+- Can we identify diurnal and weekly patterns?
+
+Three hidden states we may be interested in identifying could be:  flying, swimming, and resting
+
+**Things to think about:** There may be missing data.  
+
+## Acknowledgments
+
+If the analysis you developed with your team,  or a derivative of it, is used in your thesis or in a publication, please add the name of our research team and of your teammates in the acknowledgements. Please also let Marie Auger-Méthé (auger-methe@stat.ubc.ca) and Vianey Leos Barajas (vianey.leosbarajas@utoronto.ca) know, as we will be excited to see that our datathon has provided you with concrete help! The name of our team is: **CANSSI: Advancing Statistical Methods for the Analysis of Complex Biologging Data Collected from Humans and Animals**.
+
+
