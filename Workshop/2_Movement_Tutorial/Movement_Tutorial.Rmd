@@ -1,6 +1,6 @@
 ---
 title: 'Hidden Markov Models: Basics for animal movement data' 
-author: "Marie Auger-Méthé, Fanny Dupont, Ron Togunov, Natasha Klappstein, Arturo Esquivel"
+author: "Marie Auger-Méthé, Fanny Dupont, Ron Togunov, Natasha Klappstein, Arturo Esquivel, Marco Gallegos Herrada, Sofia Ruiz Suarez"
 output: 
   bookdown::html_document2:
     number_sections: true
@@ -61,7 +61,7 @@ We also include an Extra section where you can explore:
 First, let's load the packages that we will need to complete the analyses. 
 Of course you need to have them installed first.
 
-```{r Load packages, attr.source = ".numberLines"}
+```{r Load packages, attr.source = ".numberLines", message = FALSE, warning = FALSE}
 library(momentuHMM) # Package for fitting HMMs, builds on moveHMM
 library(raster)     # For importing and extracting raster spatial covariates
 library(tidyverse)  # data management
@@ -87,7 +87,7 @@ source("utility_functions.R")
 # Narwhal movement data
 
 We will analyze a dataset containing movement tracks of three narwhals tagged with Fastloc-GPS tags. The dataset was provided by Dr. Marianne Marcoux (Fisheries and Oceans, Canada). 
-For simplicity, we only examine the fastloc-GPS data from two weeks in August 2017. 
+For simplicity, we only examine the fastloc-GPS data from one week in August 2017. 
 
 ```{r,fig.align='center',echo=F,out.width="40%"}
 
@@ -125,12 +125,13 @@ The coordinates are in Lat/Lon (x = lon, y = lat).
 For some of the visualization, it's helpful to use a spatial object, and so we transform the track data into an `sf` object. The coordinate reference system of the original data is WGS84, which is defined by the EPSG code `4326`.
 
 ```{r, attr.source = ".numberLines"}
-tracks_gps_sf <- tracks_gps %>% st_as_sf(coords = c("x", "y")) %>% st_set_crs(4326)
+tracks_gps_sf <- tracks_gps %>% st_as_sf(coords = c("x", "y")) %>% 
+  st_set_crs(4326)
 ```
 
 To get a reference of where these narwhals are swimming, let's import a land layer.
 
-```{r import_land, attr.source = ".numberLines"}
+```{r import_land, results = 'hide', attr.source = ".numberLines"}
 land <- st_read("data/NorthBaffin.shp")
 ```
 
@@ -203,13 +204,13 @@ The gamma distribution is strictly positive (i.e., it does not allow for $0$s). 
 
 3. We need to decide whether we make the transition probabilities between the behavioural states dependent on covariates. Here, we will start simple and we will not use covariates. 
 
-4. We need to select initial values for the parameters to estimate. The HMMs are fit using maximum likelihood estimate (MLE) with a numerical optimizer. An unfortunate aspect of fitting models using numerical optimizers is that, to be able to explore the parameter space and find the best parameter values for the model, the optimizer needs to start somewhere. 
-You need to decide where it starts. Unfortunately, choosing bad starting values can result in parameter estimates that are not the MLE, but just a local maximum. To choose your initial parameter you can take a quick peak at the data (e.g., using the plots below) and use some general biological information. For example, it’s common for animals to have one behaviour with long step lengths and small turning angles and one behaviour with short step lengths and larger turning angles.
+4. We need to select starting values for the parameters to estimate. The HMMs are fit using maximum likelihood estimate (MLE) with a numerical optimizer. An unfortunate aspect of fitting models using numerical optimizers is that, to be able to explore the parameter space and find the best parameter values for the model, the optimizer needs to start somewhere. 
+You need to decide where it starts. Unfortunately, choosing bad starting values can result in parameter estimates that are not the MLE, but just a local maximum. To choose your starting parameter you can take a quick peak at the data (e.g., using the plots below) and use some general biological information. For example, it’s common for animals to have one behaviour with long step lengths and small turning angles and one behaviour with short step lengths and larger turning angles.
 
 Note, by default, `fitHMM` will set the argument `estAngleMean` to NULL, which means that we assume that the mean angle is $0$ for both behaviours (i.e., the animal has a tendency to continue in the same direction) and that only the angle concentration parameters differ. 
 The concentration parameters control the extent to which the animal continues forward versus turn. Doing so reduces the number of parameters to estimate. 
 These are all very important decisions that you must make when you construct your model.
-It's useful to visualise your data in order to choose initial parameters.
+It's useful to visualise your data in order to choose starting parameters.
 
 ```{r inits, warning=FALSE, attr.source = ".numberLines", fig.width = 10, fig.height = 4}
 par(mfrow= c(1, 2))
@@ -228,7 +229,7 @@ abline(h = 0.1, col = rgb(1, 0, 0, 0.5))
 abline(h = 0.6, col = rgb(1, 0, 0, 0.5))
 ```
 
-Based on visual examination of the data, we might choose our initial parameters to be $0.1$ and $0.6$ for the mean step lengths and use half those values for the standard deviations. 
+Based on visual examination of the data, we might choose our starting parameters to be $0.1$ and $0.6$ for the mean step lengths and use half those values for the standard deviations. 
 The turning angles are either very close to $0$ or pretty spread from $-\pi/2$ to $\pi/2$. High concentration parameter values ($\kappa$, said kappa) mean that the animal has a tendency to move in the same direction. 
 Values close to 0 mean that the turning angle distribution is almost uniform (the animal turns in all directions). 
 Note that $\kappa$ cannot be exactly 0, so let’s choose 0.1 and 1.
@@ -340,7 +341,7 @@ You can see that there is general agreement with the global (Viterbi) and local 
 
 ## Checking the stability of the parameter estimates
 
-As mentioned above, the initial parameter values can affect the estimating procedures. Thus, it's important to assess whether the parameter estimates are sensitive to the starting values we used (i.e., checking that we are not clearly at a local maximum). 
+As mentioned above, the starting parameter values can affect the estimating procedures. Thus, it's important to assess whether the parameter estimates are sensitive to the starting values we used (i.e., checking that we are not clearly at a local maximum). 
 To do so, we check if we get similar results with different starting values. Here, we will make the starting values of the two behavioural states closer to one another.
 
 ```{r inits_check, message=FALSE, attr.source = ".numberLines", cache=TRUE}
@@ -383,11 +384,12 @@ list(original = mod$mle$gamma, new = mod2$mle$gamma)
 
 Looks like they both returned very similar estimates for everything, though the negative log likelihood of the second set of starting values is slightly better. 
 
-The function `fitHMM` also has the argument `retryFits` which perturbs the parameter estimates and retries fitting the model. Since the optimization of HMMs depends on the starting values chosen, it is always good to explore multiple initial values and then choose the best estimates among them (which is done by `retryFits`). The argument is used to indicate the number of times you want to perturb the parameters and retry fitting the model (you can choose the size of the perturbation by setting the argument `retrySD)`.
+The function `fitHMM` also has the argument `retryFits` which perturbs the parameter estimates and retries fitting the model. Since the optimization of HMMs depends on the starting values chosen, it is always good to explore multiple starting values and then choose the best estimates among them (which is done by `retryFits`). The argument is used to indicate the number of times you want to perturb the parameters and retry fitting the model (you can choose the size of the perturbation by setting the argument `retrySD)`.
 
 Let’s try (this will take a few minutes).
 
 ```{r retryfits, message=FALSE, attr.source = ".numberLines", cache=TRUE}
+
 # Fit the same 2-state HMM with retryFits
 # This is a random pertubation, so setting the seed to get the same results
 set.seed(29)
@@ -411,7 +413,7 @@ mod_RF$mod$minimum - mod2$mod$minimum
 
 The maximum likelihood is again almost identical in every perturbation. However, the model second set of starting values is still slightly better (lower negative log likelihood), and would be the set of starting values to use moving forward.
 
-`momentuHMM` has functions to help selecting initial parameters for complex models, which you can explore in the Extra section.
+`momentuHMM` has functions to help selecting starting parameters for complex models, which you can explore in the Extra section.
 
 ## Pseudo-residuals
 
@@ -533,7 +535,7 @@ Here, we will will create a model where transition probabilities vary as a funct
 formula_bathy <- ~bathy
 ```
 
-As done earlier, we need to specify initial parameters and we will use the function `getPar0` to do so. This will use the estimated parameters of a previously fitted 2-state model with no covariates. 
+As done earlier, we need to specify starting parameters and we will use the function `getPar0` to do so. This will use the estimated parameters of a previously fitted 2-state model with no covariates. 
 Note that it will set the unknown linear predictor parameters to 0, and use the intercept of the previous model. 
 
 ```{r tpm_par0, message = FALSE, cache = TRUE, attr.source = ".numberLines"}
@@ -551,7 +553,7 @@ Par0_4 <- getPar0(model = mod3, formula = formula_bathy)
 Par0_4
 ```
 
-Then we can fit the model. The `formula` argument defines the model formula for the transition probabilities, and we need to set the correct initial parameters (i.e., `Par0` for the observation parameters and `beta0` for the transition probability model). 
+Then we can fit the model. The `formula` argument defines the model formula for the transition probabilities, and we need to set the correct starting parameters (i.e., `Par0` for the observation parameters and `beta0` for the transition probability model). 
 
 ```{r fit_tpm, message = FALSE, cache = TRUE, attr.source = ".numberLines"}
 # fit model
@@ -592,13 +594,13 @@ formula_tod <- ~cosinor(tod, period = 24)
 
 To link the formula to the mean step length, we specify `DM`, which will be a list of formulas for the step length (and possibly other) parameters. 
 For simplicity, we will only model the mean, but we could also model the standard deviation with the same relationship. 
-We can derive the initial parameters using the `getPar0` function, as described in the previous section.
+We can derive the starting parameters using the `getPar0` function, as described in the previous section.
 
 ```{r, message=FALSE, cache=FALSE, attr.source = ".numberLines"}
 # define step formula and design matrix
 DM <- list(step = list(mean = formula_tod, sd = ~1))
 
-# extract initial values from simpler 2-state model with no covariates
+# extract starting values from simpler 2-state model with no covariates
 Par0_5 <- getPar0(model = mod3, DM = DM)
 ```
 
@@ -659,7 +661,10 @@ tracks_gps_O <- tracks_gps_O %>%
   # remove missing locations
   filter(!is.na(x) & !is.na(y),
          # remove identical records
-         !(time == lag(time) & x == lag(x) & y == lag(y) & loc_class == lag(loc_class)))
+         !(time == lag(time) & 
+             x == lag(x) & 
+             y == lag(y) & 
+             loc_class == lag(loc_class)))
 ```
 
 Let's plot the data over the bathymetry and land layers we have imported at the beginning of the tutorial.
@@ -696,7 +701,8 @@ Let's see what resolutions may be possible in the data by looking at the most fr
 # Visualise time differences (all and zoomed)
 par(mfrow = c(1, 2))
 hist(tracks_gps_O$dt, 1000, main = NA, xlab = "Time difference (min)")
-hist(tracks_gps_O$dt, 1000, main = NA, xlab = "Time difference (min)", xlim = c(0,100))
+hist(tracks_gps_O$dt, 1000, main = NA, xlab = "Time difference (min)",
+     xlim = c(0,100))
 ```
 
 ```{r calc_track_dt2, attr.source = ".numberLines", collapse=TRUE}
