@@ -1,0 +1,57 @@
+---
+title: 'CANSSI/UBC Datathon: XX SHORT TITLE'
+author: "XX YOUR NAME"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data availability statement
+
+The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon and shared for educational purposes with accreditation (XX NAME OF PERSON TO BE ACCREDIATED). It cannot be used for any publication without written permission. Please contact XX NAME (XX EMAIL) for more information. 
+
+Let's load some of the packages needed.
+
+```{r}
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+```
+
+
+## Description of the dataset
+
+The dataset contains the data of XX WHAT IS THE DATA. The data covers a period of XX from XX to XX, with data every XX. XX ADD 3-5 SENTENCES EXPLAINING THE DATA. STATE IF THE DATA THERE IS MISSING DATA.
+
+
+Let's read the data into R and have a quick peak at it.
+
+```{r data.load}
+XX_NAME_DATA <- read.csv("XX_NAME_OF_DATA_FILE.csv")
+head(XX_NAME_DATA)
+```
+
+
+As you can see, the dataset contains these variables:
+
+- **XX**: XX_DESCRIPTION_OF VARIABLE
+INCLUDE A DESCRIPTION OF ALL VARIABLES. REMOVE ANY COLUMN YOU THINK IS NOT NECESSARY.
+
+
+## Datathon goal
+
+The goals are (1) to provide a road map of how to tackle the questions listed below, (2) attempt to complete at least the first step of your road map, and (3) provide interpretation of the results. Make a quick 5-minute presentation explaining what your team did.
+
+### Questions:
+
+XX LIST THE QUESTIONS YOU WANT TO ANSWER WITH THE DATA. KEEP IN MIND THAT HIDDEN MARKOV MODEL WILL TAKE A TIME SERIES AND FIND HIDDEN STATES WITHIN IT. USUALLY YOU WILL HAVE 3-4 HIDDEN STATES.
+
+## Acknowledgments
+
+If the analysis you developed with your team,  or a derivative of it, is used in your thesis or in a publication, please add the name of our research team and of your teammates in the acknowledgements. Please also let Marie Auger-Méthé (auger-methe@stat.ubc.ca) and Vianey Leos Barajas (vianey.leosbarajas@utoronto.ca) know, as we will be excited to see that our datathon has provided you with concrete help! The name of our team is: **CANSSI: Advancing Statistical Methods for the Analysis of Complex Biologging Data Collected from Humans and Animals**.
+
+

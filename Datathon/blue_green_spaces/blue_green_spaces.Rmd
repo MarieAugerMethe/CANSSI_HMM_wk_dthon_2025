@@ -1,0 +1,159 @@
+---
+title: 'CANSSI/UBC Datathon: Visitations patterns in blue-green spaces '
+author: "Asim Khanal"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data availability statement
+
+The dataset for this activity is available in the file *XX_NAME_OF_DATA_FILE.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon. It cannot be used for any publication without written permission. The data was received from Mapbox Inc (https://www.mapbox.com/). through their educational partnership program. Please contact Asim Khanal (khanal.asim73\@gmail.com) for more information. 
+
+Let's load some of the packages needed.
+
+```{r, message=FALSE, warnings=FALSE}
+library(tidyverse)
+library(sf) # For spatial data
+library(mapview) # To quickly map
+```
+
+
+## Description of the dataset
+
+Mapbox Inc. is a third-party source that provides movement data based on anonymized mobile GPS signals. In Mapbox datasets, visitation is indicated by the “activity index”, which is based on the density of smart devices within a 100 x 100 m grid cell. Mapbox Movement data are aggregations of movement activity for a given time span and geographic area. Thus, a high activity index within a grid cell can be both from a high density of smart devices or continuous movement of the same smart devices. In addition, the data is normalized for a given country (i.e., Canada) and each time interval is scaled to a baseline of the mean activity patterns for January of the respective year, making the obtained activity index unitless without any real-world equivalent, such as the density of people, number of smart devices, or time spent in an area.
+
+Here, we selected 13 cells found in a park and assumed that if Mapbox Inc did not report a activity value for a given day, the activity level was 0.
+
+
+```{r, eval=FALSE, echo=FALSE}
+
+land <- read.csv("Land-polygons-with-coordinates-TABLE_10th_Feb_HMM_workshop.csv")
+van_parks <- land %>% filter(Jurisdiction == "Vancouver")
+gps_data <- read.csv("vancouver_data_2022.csv")
+gps_data <- gps_data %>% filter(!is.na(xlon) & !is.na(xlat))
+
+gps_data_sf <- st_as_sf(gps_data, coords = c("xlon","xlat"), remove=FALSE)
+
+
+st_crs(gps_data_sf) <- 4326 #WGS 84
+# ggplot() +
+#   geom_sf(data = gps_data_sf)
+# 
+# 
+# mapview(gps_data_sf,
+#         layer.name=" ")
+
+# Selected park, by eye
+gps_data_sf_chosen <- gps_data_sf[c(2657, 6819, 7158, 8182, 9357, 10564, 11054, 19219, 21988, 23052, 23884, 24354, 27842),
+                                  ]
+mapview(gps_data_sf_chosen,
+        layer.name=" ")
+
+
+gps_data_sf_chosen2 <- gps_data_sf[which(!is.na(match(gps_data_sf$bounds, gps_data_sf_chosen$bounds))),]
+
+mapview(gps_data_sf_chosen2,
+        layer.name=" ")
+
+gps_data_sf_chosen2 <- as.data.frame(gps_data_sf_chosen2)
+
+# Create cell index and group by it
+gps_data_sf_chosen2 <- gps_data_sf_chosen2 %>% 
+  mutate(cellID = as.numeric(as.factor(bounds))) %>%
+  group_by(cellID)
+gps_data_sf_chosen2 <- gps_data_sf_chosen2 %>%
+  mutate(date = ymd(agg_day_period)) 
+
+# Days with no activity
+ts <- seq(ymd("2022-01-01"), max(gps_data_sf_chosen2$date), by="day")
+ts <- data.frame(date = rep(ts, 13),
+                 cellID = rep(1:13, each = length(ts)))
+
+
+
+gps_data_chosen3 <- full_join(ts, gps_data_sf_chosen2) %>%
+  group_by(cellID) %>%
+  mutate(lon = na.omit(unique(xlon)),
+         lat = na.omit(unique(xlat)),
+         bounds = na.omit(unique(bounds))) %>%
+  select(cellID, date, lon, lat, activity_index_total, bounds)
+
+gps_data_chosen3 <- gps_data_chosen3 %>% replace_na(list(activity_index_total = 0))
+  
+write.csv(gps_data_chosen3, "van_13_gps_2022.csv", row.names = FALSE)
+
+```
+
+
+
+Let's read the data into R and have a quick peak at it.
+
+```{r data.load}
+parks_activity <- read.csv("van_13_gps_2022.csv")
+# Make cellID a factor
+parks_activity$cellID <- as.factor(parks_activity$cellID)
+# Make date a date object
+parks_activity$date <- ymd(parks_activity$date)
+head(parks_activity)
+```
+
+As you can see, the dataset contains these variables:
+
+
+- **cellID:** identification number of the cell selected (each associated with a park in Vancouver)
+- **date:** date of the activity information (ranging from Jan 1 2022 to Dec 31 2022)
+- **lon:** longitude of the cell center
+- **lat:** latitude of the cell center
+- **activity_index_total:**  estimate for daily average visitation (density of people) in the cell
+- **bounds:** limit of the cell
+
+
+### Quick visualization
+
+Let's map the cells that were selected.
+
+```{r}
+# Create spatial object to map quickly
+parks_sf <- st_as_sf(parks_activity, coords = c("lon","lat"), remove=FALSE)
+st_crs(parks_sf) <- 4326 #Coordinate system: WGS 84
+
+mapview(parks_sf, zcol = "cellID",
+        layer.name=" ")
+
+```
+
+Let's look at the change in activity level through time.
+
+```{r}
+plot_act <- ggplot(data = parks_activity) +
+  geom_line(aes(x = date, y = activity_index_total)) +
+  facet_wrap(~ cellID, ncol=3) +
+  ylab("Activity levels")
+plot_act
+```
+
+
+## Datathon goal
+
+The goals are (1) to provide a road map of how to tackle the questions listed below, (2) attempt to complete at least the first step of your road map, and (3) provide interpretation of the results. Make a quick 5-minute presentation explaining what your team did.
+
+### Questions:
+
+The general goal is to understand what may be affecting the visitation patterns and see if  we predict the visitation patterns for subsequent years. Given the dataset we have at hand we can explore the following questions:
+
+- Are there weekly or seasonal patterns in the data?
+
+Here the main interest is identifying patterns in visitations. Three hidden states we may be interested in identifying could be: low, medium, and high visitation.
+
+**Things to think about:** Cells may differ in what is high levels, as such in may be important to consider things like random effects emission distributions. Especially as the number of cell included increases, it may be important to look at unexplained spatial autocorrelation. 
+
+## Acknowledgments
+
+If the analysis you developed with your team,  or a derivative of it, is used in your thesis or in a publication, please add the name of our research team and of your teammates in the acknowledgements. Please also let Marie Auger-Méthé (auger-methe@stat.ubc.ca) and Vianey Leos Barajas (vianey.leosbarajas@utoronto.ca) know, as we will be excited to see that our datathon has provided you with concrete help! The name of our team is: **CANSSI: Advancing Statistical Methods for the Analysis of Complex Biologging Data Collected from Humans and Animals**.
+
+

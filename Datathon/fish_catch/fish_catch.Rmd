@@ -1,0 +1,116 @@
+---
+title: 'CANSSI/UBC Datathon: what explains rapid declines in fish abudance?'
+author: "Isabella Morgante"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data availability statement
+
+
+The dataset for this activity is available in the file *fish_data.csv* shared via Github (https://github.com/MarieAugerMethe/CANSSI_HMM_wk_dthon_2025). It can be used for our CANSSI/UBC datathon and shared for educational purposes with accreditation (Isabella Morgante, Juliano Palacios Abrantes, Muhammed Oyinlola & William Cheung). It cannot be used for any publication without written permission. Please contact Isabella Morgante (i.morgante@oceans.ubc.ca) & Juliano Palacios Abrantes (j.palacios@oceans.ubc.ca) for more information. 
+
+Let's load some of the packages needed.
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggpubr) # to combine ggplots
+```
+
+
+## Description of the dataset
+
+This dataset contains simulations of total annual global fish catch and abundance for three fish species from 1850 - 2010: European anchovy, Chub mackerel, and European pilchard. The simulations were run using the Dynamic Bioclimatic Envelope Model (DBEM), a global fisheries model by Cheung et al. (2011) and fishing effort data from the Fisheries Model Intercomparison Project (FishMIP).
+
+For each species, 2 simulations are available – one where there is no fishing occurs and a second where fishing is applied. All simulations were run under the same environmental conditions. The annual average fishing mortality (a proportion of maximum sustainable yield) and the annual average sea surface temperature (°C) each species was exposed to is also provided.
+
+
+Let's read the data into R and have a quick peak at it.
+
+```{r data.load}
+fish_sim <- read.csv("fish_data.csv")
+head(fish_sim)
+```
+
+
+As you can see, the dataset contains these variables:
+
+- **Abd:** Total fish abundance (for simulations with fishing)
+- **Abd_noCatch:** Total fish abundance (for simulations without fishing)
+- **Catch:** Total fish catch
+- **SST:** mean sea surface temperature (°C)
+- **FMort:** mean fishing mortality
+- **Year:** year of data
+- **TaxonID:** identification code of the fish species
+- **TaxonName:** Scientific name of the fish species
+- **CommonName:** Common name of the fish species
+
+### Quick visualization
+
+Plots of simulated data with temperature and fishing
+
+```{r}
+# Average temperature used in simulations (averaged over the range of the fish)
+plot_temp <- ggplot(data = fish_sim, aes(x = Year)) +
+  geom_line(aes(y = SST, colour = CommonName), size = 1) +
+  ylab("Temperature")
+
+# Simulated fish abundance when there is no fishing
+plot_sims_no_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
+  geom_line(aes(y = Abd_noCatch, colour = CommonName), size = 1) +
+  ylab("Fish abundance")
+```
+
+Plot of the simulations when there is fishing.
+
+```{r}
+# Scale to be able to plot both axes
+sc <- 100
+plot_sims_with_fishing <- ggplot(data = fish_sim, aes(x = Year)) +
+  geom_line(aes(y = Abd, colour = CommonName), size = 1) +
+  geom_line(aes(y = Catch*sc, colour = CommonName), size = 0.5, lty = 2) +
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Fish abundance",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*sc, name="Fish catch (dashed)"))
+
+
+ggarrange(plot_temp, plot_sims_no_fishing, plot_sims_with_fishing, 
+          ncol = 1, common.legend = TRUE)
+```
+
+## Datathon goal
+
+The goals are (1) to provide a road map of how to tackle the questions listed below, (2) attempt to complete at least the first step of your road map, and (3) provide interpretation of the results. Make a quick 5-minute presentation explaining what your team did.
+
+### Questions:
+
+The main goal is to understand what conditions create a rapid decline in the population. Specifically, the questions to answer are:
+
+- Do the different fish species experience a rapid decline in abundance? If so, when does this happen?
+
+- Is a rapid decline relate to a particular condition in the fishing mortality or sea surface temperature (e.g., is the rapid decline link to a specific increase in fishing mortality)?
+
+Here the main interest is identifying the cause of a rapid decline in fish abundance. The four hidden states we may be interested in identifying could be: increase in abundance, stable, slow decline, rapid decline.
+
+**Things to think about:** If interested in rate of change (i.e., rate of decline), abundance may not be the variable to model. Instead, you may want to consider rate of change in abundance. In addition, think about how the covariates could be included in the model (linear vs other options related to heat tolerance of the fish) and the potential for interactions between temperature and fishing mortality. One potential difficulty is that there may be only one rapid decline period per time series, which may limit the ability of the model to identify it.
+
+### MAM: Izzy: can you give info on the heat tolerance of the 3 species of fish explored here?
+
+### MAM: Izzy: can you also give me the full ref for William's paper.
+
+### MAM: Izzy: do you have other time series that are similar to the above. Something in the same magnitude of abundance will make it easier to plot, but it's not necessary for the HMMs.
+
+## Acknowledgments
+
+If the analysis you developed with your team,  or a derivative of it, is used in your thesis or in a publication, please add the name of our research team and of your teammates in the acknowledgements. Please also let Marie Auger-Méthé (auger-methe@stat.ubc.ca) and Vianey Leos Barajas (vianey.leosbarajas@utoronto.ca) know, as we will be excited to see that our datathon has provided you with concrete help! The name of our team is: **CANSSI: Advancing Statistical Methods for the Analysis of Complex Biologging Data Collected from Humans and Animals**.
+
+
