@@ -1,5 +1,5 @@
 ---
-title: "ForCANSSII"
+title: "CANSSI/UBC Datathon: is toxo affecting the behaviour of gulls?"
 output: html_document
 author: "Shabnam Shadloo"
 date: "2025-02-10"
