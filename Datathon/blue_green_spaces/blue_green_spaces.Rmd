@@ -150,7 +150,7 @@ The general goal is to understand what may be affecting the visitation patterns 
 
 Here the main interest is identifying patterns in visitations. Three hidden states we may be interested in identifying could be: low, medium, and high visitation.
 
-**Things to think about:** Cells may differ in what is high levels, as such in may be important to consider things like random effects emission distributions. Especially as the number of cell included increases, it may be important to look at unexplained spatial autocorrelation.
+**Things to think about:** Cells may differ in what is high levels, as such in may be important to consider things like random effects emission distributions. Especially as the number of cell included increases, it may be important to look at unexplained spatial autocorrelation. 
 
 ## Acknowledgments
 
